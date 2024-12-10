@@ -12,8 +12,10 @@ image:
   command:
     - "/benthos-plugin"
   args:
-    - -w
-    - -c
+    - '-w'
+    - '-r'
+    - /config/resources.yaml
+    - '-c'
     - /config/config.yaml
     - streams
     - /streams/
