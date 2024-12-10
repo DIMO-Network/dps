@@ -16,7 +16,7 @@ image:
     - '-r'
     - /resources/resources.yaml
     - '-c'
-    - /config/config.yaml
+    - /config/
     - streams
     - /streams/
 
