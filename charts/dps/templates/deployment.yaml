@@ -83,7 +83,7 @@ spec:
             - name: config
               mountPath: /config
       volumes:
-        - name: status
+        - name: signals
           configMap:
             name: {{ include "dps.fullname" . }}-stream-config
             items:
