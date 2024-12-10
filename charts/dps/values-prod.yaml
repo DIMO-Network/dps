@@ -1,0 +1,28 @@
+replicaCount: 3
+
+kafka:
+  clusterName: kafka-prod-dimo-kafka
+
+env:
+  KAFKA_BOOTSTRAP_SERVERS: kafka-prod-dimo-kafka-kafka-bootstrap
+  DEVICE_STATUS_TOPIC: topic.device.status.enriched
+  ENVIRONMENT: prod
+  DEVICES_APIGRPC_ADDR: devices-api-prod:8086
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80

@@ -1,0 +1,130 @@
+# Default values for dps.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: dimozone/benthos-plugin
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "2954eea"
+  command:
+    - "/benthos-plugin"
+  args:
+    - -w
+    - -c
+    - /config/config.yaml
+    - streams
+    - /streams/
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - all
+
+env:
+  KAFKA_BOOTSTRAP_SERVERS: kafka-dev-dimo-kafka-kafka-brokers
+  DEVICE_STATUS_TOPIC: topic.device.status.enriched
+  DEVICE_STATUS_V2_TOPIC: topic.device.status.v2
+  ELASTIC_MULTIPLE_NODE: false
+  ENVIRONMENT: dev
+  CLICKHOUSE_PORT: 9440
+  CLICKHOUSE_DATABASE: dimo
+  DEVICES_APIGRPC_ADDR: devices-api-dev:8086
+  LOG_LEVEL: INFO
+
+service:
+  type: ClusterIP
+  ports:
+    mon-http:
+      port: 8888
+      targetPort: mon-http
+      protocol: TCP
+    http:
+      port: 8080
+      targetPort: http
+      protocol: TCP
+
+ports:
+  - name: mon-http
+    containerPort: 8888
+    protocol: TCP
+  - name: http
+    containerPort: 8080
+    protocol: TCP
+
+livenessProbe:
+  httpGet:
+    path: /ping
+    port: mon-http
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: mon-http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+  successThreshold: 1
+
+ingress:
+  enabled: false
+
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 50m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+podDisruptionBudget:
+  maxUnavailable: 1
+  #minAvailable: 1
+
+serviceMonitor:
+  enabled: true
+  path: "/metrics"
+  port: mon-http
+  interval: 30s
