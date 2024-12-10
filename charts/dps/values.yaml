@@ -46,14 +46,14 @@ securityContext:
 
 env:
   KAFKA_BOOTSTRAP_SERVERS: kafka-dev-dimo-kafka-kafka-brokers
-  DEVICE_STATUS_TOPIC: topic.device.status.enriched
-  DEVICE_STATUS_V2_TOPIC: topic.device.status.v2
+  DEVICE_SIGNALS_TOPIC: topic.device.signals
+  DEVICE_VALID_CE_TOPIC: topic.device.validcloudevents
+  DEVICE_PARTIAL_CE_TOPIC: topic.device.partialcloudevents
   ELASTIC_MULTIPLE_NODE: false
   ENVIRONMENT: dev
   CLICKHOUSE_PORT: 9440
   CLICKHOUSE_DATABASE: dimo
-  DEVICES_APIGRPC_ADDR: devices-api-dev:8086
-  LOG_LEVEL: INFO
+  LOG_LEVEL: DEBUG
 
 service:
   type: ClusterIP
@@ -128,3 +128,28 @@ serviceMonitor:
   path: "/metrics"
   port: mon-http
   interval: 30s
+
+kafka:
+  clusterName: kafka-dev-dimo-kafka
+  topics:
+    - name: topic.device.signals
+      config:
+        segment.ms: '3600000'
+        compression.type: producer
+        cleanup.policy: compact,delete
+        min.compaction.lag.ms: '3600000'
+        retention.ms: '604800000'
+    - name: topic.device.validcloudevents
+      config:
+        segment.ms: '3600000'
+        compression.type: producer
+        cleanup.policy: compact,delete
+        min.compaction.lag.ms: '3600000'
+        retention.ms: '604800000'
+    - name: topic.device.partialcloudevents
+      config:
+        segment.ms: '3600000'
+        compression.type: producer
+        cleanup.policy: compact,delete
+        min.compaction.lag.ms: '3600000'
+        retention.ms: '604800000'

@@ -4,7 +4,7 @@ input:
     addresses:
       - ${KAFKA_BOOTSTRAP_SERVERS:localhost}:${KAFKA_BOOTSTRAP_PORT:9092}
     topics:
-      - '${DEVICE_SIGNALS_TOPIC:topic.device.partialcloudevents}'
+      - '${DEVICE_PARTIAL_CE_TOPIC:topic.device.partialcloudevents}'
     consumer_group: "zone.dimo.export.partialcloudevents"
     client_id: ${CONTAINER_NAME:localhost}-dps-status
     rack_id: ${NODE_NAME:localhost}
