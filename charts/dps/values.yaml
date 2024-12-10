@@ -53,6 +53,8 @@ env:
   ENVIRONMENT: dev
   CLICKHOUSE_PORT: 9440
   CLICKHOUSE_DATABASE: dimo
+  S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-dev
+  S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-dev
   LOG_LEVEL: DEBUG
 
 service:
