@@ -1,0 +1,36 @@
+processor_resources:
+  - label: "dimo_error_count"
+    metric:
+      type: counter
+      name: dimo_error_count
+      labels:
+        component: ${! metadata("dimo_component") }
+        source: ${! metadata("dimo_cloudevent_source") }
+        error: ${! metadata("error") }
+
+  - label: "dimo_partial_index_count"
+    metric:
+      type: counter
+      name: dimo_partial_index_count
+      labels:
+        source: ${! metadata("dimo_cloudevent_source").or("unknown") }
+
+  - label: "handle_db_error"
+    processors:
+      - group_by_value:
+          value: ${! metadata("cloudevent_id").or("") } ${! metadata("cloudevent_source").or("") }
+      - select_parts:
+          parts: [0]
+      - label: "log_db_error"
+        log:
+          level: WARN
+          message: 'Dropping message'
+          fields_mapping: |
+            cloudevent_source = metadata("dimo_cloudevent_source").or("unknown")
+            cloudevent_producer = metadata("dimo_cloudevent_producer").or("unknown")
+            cloudevent_subject = metadata("dimo_cloudevent_subject").or("unknown")
+            cloudevent_type = metadata("dimo_cloudevent_type").or("unknown")
+            cloudevent_id = metadata("dimo_cloudevent_id").or("unknown")
+            component = metadata("dimo_component").or("unknown")
+            error = if errored() { error() } else { metadata("fallback_error").or("unknown") }
+      - resource: "dimo_error_count"

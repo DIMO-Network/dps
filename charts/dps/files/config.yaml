@@ -1,0 +1,14 @@
+http:
+  address: 0.0.0.0:8888
+
+logger:
+  level: ${LOG_LEVEL:INFO}
+  add_timestamp: true
+  format: json
+  static_fields:
+    'appname': zone.dimo.export.es
+
+metrics:
+  prometheus: {}
+
+shutdown_timeout: 20s

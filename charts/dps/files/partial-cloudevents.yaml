@@ -1,0 +1,82 @@
+input:
+  label: kafka_input
+  kafka:
+    addresses:
+      - ${KAFKA_BOOTSTRAP_SERVERS:localhost}:${KAFKA_BOOTSTRAP_PORT:9092}
+    topics:
+      - '${DEVICE_SIGNALS_TOPIC:topic.device.partialcloudevents}'
+    consumer_group: "zone.dimo.export.partialcloudevents"
+    client_id: ${CONTAINER_NAME:localhost}-dps-status
+    rack_id: ${NODE_NAME:localhost}
+    commit_period: 1s
+    fetch_buffer_cap: 500
+    checkpoint_limit: 500
+
+pipeline:
+  processors:
+    - label: "inputlogger"
+      for_each:
+        - log:
+            level: DEBUG
+            message: 'MessageReceived'
+            fields_mapping: |
+              root.payload = this
+
+output:
+  label: "insert_partial_cloudevent"
+  drop_on:
+    error: true
+    output:
+      broker:
+        pattern: fan_out_sequential_fail_fast
+        outputs:
+          - fallback:
+              - label: "insert_partial_cloudevent_s3"
+                aws_s3:
+                  bucket: ${S3_EPHEMERAL_BUCKET}
+                  path: ${!meta("dimo_cloudevent_index")}
+                  content_type: application/json
+                  region: us-east-2
+                  max_in_flight: 250
+                  timeout: 30s
+                  credentials:
+                    id: ${S3_AWS_ACCESS_KEY_ID}
+                    secret: ${S3_AWS_SECRET_ACCESS_KEY}
+              # reject the message, log, record metrics
+              # reject instead of drop to avoid attempting CH index insert with no backing obj
+              - label: 'insert_partial_cloudevent_s3_failure'
+                reject: '${!metadata("fallback_error").or("failed to store converted cloudevent")}'
+                processors:
+                  -  mutation: |
+                       meta dimo_component = "insert_partial_cloudevent_s3"
+                  - resource: "handle_db_error"
+
+          - fallback:
+              - label: "insert_partial_cloudevent_clickhouse"
+                sql_insert:
+                  driver: clickhouse
+                  dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s&max_execution_time=300
+                  table: name_index
+                  columns: []
+                  args_mapping: root = this
+                  batching:
+                    count: 100000
+                    byte_size: 0
+                    period: "1s"
+                    check: ""
+                processors:
+                  - label: "split_values_partial"
+                    dimo_split_values: {}
+                  - catch:
+                      -  mutation: |
+                           meta dimo_component = "split_values_partial"
+                      - resource: "handle_db_error"
+                      - mapping: root = deleted()
+
+              # Drop the message, log, record metrics and send 500 response
+              - label: 'insert_partial_cloudevent_clickhouse_failure'
+                drop: {}
+                processors:
+                  -  mutation: |
+                       meta dimo_component = "insert_partial_cloudevent_clickhouse"
+                  - resource: "handle_db_error"

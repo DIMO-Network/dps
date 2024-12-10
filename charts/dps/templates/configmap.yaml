@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dps.fullname" . }}-stream-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "dps.labels" . | indent 4 }}
+data:
+{{ tpl (.Files.Glob "files/*").AsConfig $ | indent 2 }}
