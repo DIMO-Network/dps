@@ -14,7 +14,7 @@ image:
   args:
     - '-w'
     - '-r'
-    - /config/resources.yaml
+    - /resources/resources.yaml
     - '-c'
     - /config/config.yaml
     - streams

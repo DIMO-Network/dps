@@ -84,7 +84,7 @@ spec:
               mountPath: /config
               subPath: config.yaml
             - name: resources
-              mountPath: /config/resources.yaml
+              mountPath: /resources/resources.yaml
               subPath: resources.yaml
 
       volumes:
