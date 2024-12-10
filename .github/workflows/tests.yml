@@ -7,29 +7,22 @@ on:
       - main
 
 jobs:
-  install-tools:
-    if: "!contains(github.event.head_commit.message, 'Merge pull request')"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install all tools
-        run: make tools
-      - uses: actions/upload-artifact@v4
-        with:
-          name: tools
-          path: bin/
+  rules-test:
+    runs-on: [ self-hosted, linux ]
 
-  prometheus-rules:
-    needs: install-tools
-    if: "!contains(github.event.head_commit.message, 'Merge pull request')"
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      # using go to get arch and os
+      - name: Install Go
+        uses: actions/setup-go@v5
         with:
-          name: tools
-          path: bin/
-      - name: Set executable
-        run: chmod +x bin/*
-      - name: Run Prometheus rules tests
+          go-version: 1.22
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # we need to install promtool to run the tests
+      - name: Install promtool
+        run: make tools
+
+      - name: Run tests
         run: make test
