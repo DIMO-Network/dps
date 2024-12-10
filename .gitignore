@@ -1,0 +1,34 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# binary only
+bin
+dis
+!dis/
+!dis/*
+__debug_bin*
+*.DS_Store
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Go workspace file
+go.work
+
+# VS code files
+.vscode/*
+*.code-workspace
+.history/
+
+# GoLand
+.idea/
+
+# ignore file used for test.
+alerts-modified.yaml
