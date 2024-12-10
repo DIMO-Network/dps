@@ -80,8 +80,13 @@ spec:
             - name: partial-cloudevents
               mountPath: /streams/partial-cloudevents.yaml
               subPath: partial-cloudevents.yaml
+            - name: resources
+              mountPath: /config/resources.yaml
+              subPath: resources.yaml
             - name: config
               mountPath: /config
+              subPath: config.yaml
+
       volumes:
         - name: signals
           configMap:
