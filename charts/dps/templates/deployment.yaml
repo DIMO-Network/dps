@@ -112,6 +112,12 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
+        - name: resources
+          configMap:
+            name: {{ include "dps.fullname" . }}-stream-config
+            items:
+              - key: resources.yaml
+                path: resources.yaml
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
