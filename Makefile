@@ -33,9 +33,6 @@ test-prom: ## run prometheus tests
 	promtool check rules tests/prom/alerts-modified.yaml
 	promtool test rules tests/prom/rules-tests.yaml
 
-tools-benthos-plugin: ## install benthos-plugin
-	GOBIN=$(PATHINSTBIN) go install github.com/DIMO-Network/benthos-plugin@latest
-
 tools-promtool: ## install promtools
 	mkdir -p $(PATHINSTBIN)
 	wget $(PROMETHEUS_URL) -O $(PATHINSTBIN)/$(PROMETHEUS_TAR)
@@ -43,4 +40,4 @@ tools-promtool: ## install promtools
 	cp $(PATHINSTBIN)/prometheus-$(PROMETHEUS_VERSION).$(GOOS)-$(GOARCH)/promtool $(PATHINSTBIN)
 	rm -rf $(PATHINSTBIN)/$(PROMETHEUS_TAR) $(PATHINSTBIN)/prometheus-$(PROMETHEUS_VERSION).$(GOOS)-$(GOARCH)
 
-make tools: tools-benthos-plugin tools-promtool ## install all tools
+make tools: tools-promtool ## install all tools
