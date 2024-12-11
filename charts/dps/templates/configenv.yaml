@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dps.fullname" . }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+{{ include "dps.labels" . | indent 4 }}
+data:
+{{- range $key, $val := .Values.env }}
+  {{ $key }} : {{ $val | quote}}
+{{- end}}

@@ -1,0 +1,28 @@
+name: Tests
+on:
+  pull_request:
+    branches: ["**"]
+  push:
+    branches:
+      - main
+
+jobs:
+  rules-test:
+    runs-on: [ self-hosted, linux ]
+
+    steps:
+      # using go to get arch and os
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # we need to install promtool to run the tests
+      - name: Install promtool
+        run: make tools
+
+      - name: Run tests
+        run: make test

@@ -1,0 +1,23 @@
+{{- define "alerts" -}}
+groups:
+  - name: dps-service
+    rules:
+      - alert: NoCloudEventSentClickhouse
+        expr: sum(rate(output_batch_sent{namespace="{{ .Release.Namespace }}", container="dps", label="insert_valid_cloudevent_clickhouse"}[30m])) BY (pod, job, namespace) == 0
+        for: 30m
+        labels:
+          severity: critical
+          namespace: {{ .Release.Namespace }}
+        annotations:
+          summary: 'No data sent to CH in the last 30 minutes'
+          description: 'Please check dps service and networking.'
+      - alert: NoSignalsSentClickhouse
+        expr: sum(rate(output_batch_sent{namespace="{{ .Release.Namespace }}", container="dps", label="insert_signal_clickhouse"}[30m])) BY (pod, job, namespace) == 0
+        for: 30m
+        labels:
+          severity: critical
+          namespace: {{ .Release.Namespace }}
+        annotations:
+          summary: 'No data sent to Clickhouse in the last 30 minutes'
+          description: 'Please check dps service and networking.'
+{{- end -}}

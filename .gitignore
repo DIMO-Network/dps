@@ -7,9 +7,9 @@
 
 # binary only
 bin
-dis
-!dis/
-!dis/*
+dps
+!dps/
+!dps/*
 __debug_bin*
 *.DS_Store
 

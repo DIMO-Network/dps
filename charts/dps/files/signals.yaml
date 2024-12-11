@@ -1,0 +1,46 @@
+input:
+  label: kafka_input
+  kafka:
+    addresses:
+      - ${KAFKA_BOOTSTRAP_SERVERS:localhost}:${KAFKA_BOOTSTRAP_PORT:9092}
+    topics:
+      - '${DEVICE_SIGNALS_TOPIC:topic.device.signals}'
+    consumer_group: "zone.dimo.export.signals"
+    client_id: ${CONTAINER_NAME:localhost}-dps-status
+    rack_id: ${NODE_NAME:localhost}
+    commit_period: 1s
+    fetch_buffer_cap: 500
+    checkpoint_limit: 500
+
+pipeline:
+  processors:
+    - label: "inputlogger"
+      for_each:
+        - log:
+            level: DEBUG
+            message: 'MessageReceived'
+            fields_mapping: |
+              root.payload = this
+
+output:
+  label: "insert_signal"
+  fallback:
+    - label: "insert_signal_clickhouse"
+      sql_insert:
+        driver: clickhouse
+        dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_SIGNAL_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&max_execution_time=600
+        table: signal
+        columns: []
+        args_mapping: root = this
+        batching:
+          count: 10000
+          byte_size: 0
+          period: "10ms"
+          check: ""
+    # Drop the message, log, record metrics
+    - label: "insert_signal_clickhouse_failure"
+      drop: {}
+      processors:
+        -  mutation: |
+             meta dimo_component = "insert_signal_clickhouse"
+        - resource: "handle_db_error"

@@ -1,0 +1,132 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "dps.fullname" . }}
+  labels:
+    {{- include "dps.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "dps.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      annotations:
+        checksum/env: {{ include (print $.Template.BasePath "/configenv.yaml" ) . | sha256sum }}
+        checksum/stream: {{ include (print $.Template.BasePath "/configmap.yaml" ) . | sha256sum }}
+      {{- with .Values.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "dps.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "dps.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          {{  range .Values.image.command -}}
+            - {{ . }}
+          {{ end }}
+          args:
+          {{  range .Values.image.args -}}
+            - {{ . }}
+          {{ end }}
+          envFrom:
+          - configMapRef:
+              name: {{ include "dps.fullname" . }}-config
+          - secretRef:
+              name: {{ include "dps.fullname" . }}-secret
+          env:
+          - name: CONTAINER_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: CONTAINER_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+                env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          ports:
+{{ toYaml .Values.ports | indent 12 }}
+          livenessProbe:
+{{ toYaml .Values.livenessProbe | indent 12 }}
+          readinessProbe:
+{{ toYaml .Values.readinessProbe | indent 12 }}
+          resources:
+{{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: signals
+              mountPath: /streams/signals.yaml
+              subPath: signals.yaml
+            - name: valid-cloudevents
+              mountPath: /streams/valid-cloudevents.yaml
+              subPath: valid-cloudevents.yaml
+            - name: partial-cloudevents
+              mountPath: /streams/partial-cloudevents.yaml
+              subPath: partial-cloudevents.yaml
+            - name: config
+              mountPath: /config
+              subPath: config.yaml
+            - name: resources
+              mountPath: /resources/resources.yaml
+              subPath: resources.yaml
+
+      volumes:
+        - name: signals
+          configMap:
+            name: {{ include "dps.fullname" . }}-stream-config
+            items:
+              - key: signals.yaml
+                path: signals.yaml
+        - name: valid-cloudevents
+          configMap:
+            name: {{ include "dps.fullname" . }}-stream-config
+            items:
+              - key: valid-cloudevents.yaml
+                path: valid-cloudevents.yaml
+        - name: partial-cloudevents
+          configMap:
+            name: {{ include "dps.fullname" . }}-stream-config
+            items:
+              - key: partial-cloudevents.yaml
+                path: partial-cloudevents.yaml
+        - name: config
+          configMap:
+            name: {{ include "dps.fullname" . }}-stream-config
+            items:
+              - key: config.yaml
+                path: config.yaml
+        - name: resources
+          configMap:
+            name: {{ include "dps.fullname" . }}-stream-config
+            items:
+              - key: resources.yaml
+                path: resources.yaml
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
