@@ -1,16 +1,10 @@
-# Default values for dps.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-
 replicaCount: 1
-
 image:
   repository: dimozone/dps
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "2954eea"
+  tag: 5f7d197
   command:
-    - "/dps"
+    - /dps
   args:
     - '-w'
     - '-r'
@@ -19,33 +13,23 @@ image:
     - /config/
     - streams
     - /streams/
-
 imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
+nameOverride: ''
+fullnameOverride: ''
 serviceAccount:
-  # Specifies whether a service account should be created
   create: true
-  # Annotations to add to the service account
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
-
+  name: ''
 podAnnotations: {}
-
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 10001
   runAsGroup: 10001
-
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
       - all
-
 env:
   KAFKA_BOOTSTRAP_SERVERS: kafka-dev-dimo-kafka-kafka-brokers
   DEVICE_SIGNALS_TOPIC: topic.device.signals
@@ -59,7 +43,6 @@ env:
   S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-dev
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-dev
   LOG_LEVEL: DEBUG
-
 service:
   type: ClusterIP
   ports:
@@ -71,7 +54,6 @@ service:
       port: 8080
       targetPort: http
       protocol: TCP
-
 ports:
   - name: mon-http
     containerPort: 8888
@@ -79,7 +61,6 @@ ports:
   - name: http
     containerPort: 8080
     protocol: TCP
-
 livenessProbe:
   httpGet:
     path: /ping
@@ -89,7 +70,6 @@ livenessProbe:
   timeoutSeconds: 5
   failureThreshold: 3
   successThreshold: 1
-
 readinessProbe:
   httpGet:
     path: /ready
@@ -99,10 +79,8 @@ readinessProbe:
   timeoutSeconds: 5
   failureThreshold: 3
   successThreshold: 1
-
 ingress:
   enabled: false
-
 resources:
   limits:
     cpu: 250m
@@ -110,30 +88,21 @@ resources:
   requests:
     cpu: 50m
     memory: 128Mi
-
 autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}
-
 podDisruptionBudget:
   maxUnavailable: 1
-  #minAvailable: 1
-
 serviceMonitor:
   enabled: true
-  path: "/metrics"
+  path: /metrics
   port: mon-http
   interval: 30s
-
 kafka:
   clusterName: kafka-dev-dimo-kafka
   topics:
