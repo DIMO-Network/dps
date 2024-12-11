@@ -35,5 +35,5 @@ tests:
               namespace: dev
             exp_annotations:
               summary: "No data sent to Clickhouse in the last 30 minutes"
-              description: "Please check dis service and networking."
+              description: "Please check dps service and networking."
 
