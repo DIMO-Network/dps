@@ -64,8 +64,8 @@ output:
                     period: "1s"
                     check: ""
                 processors:
-                  - label: "split_values_valid"
-                    dimo_split_values: {}
+#                  - label: "split_values_valid"
+#                    dimo_split_values: {}
                   - catch:
                       -  mutation: |
                            meta dimo_component = "split_values_valid"
