@@ -1,4 +1,4 @@
-.PHONY: test
+.PHONY: clean build install dep test lint format tools-golangci-lint tools-promtool tools help
 
 PATHINSTBIN = $(abspath ./bin)
 export PATH := $(PATHINSTBIN):$(PATH)
