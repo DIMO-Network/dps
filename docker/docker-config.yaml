@@ -1,0 +1,9 @@
+# placeholder config
+http:
+  enabled: true
+
+metrics:
+  prometheus: {}
+
+logger:
+  format: json

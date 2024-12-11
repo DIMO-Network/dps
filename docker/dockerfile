@@ -1,0 +1,24 @@
+FROM golang:1.23 AS build
+
+RUN useradd -u 10001 dimo
+
+WORKDIR /build
+COPY . ./
+
+RUN make dep
+RUN make build
+
+# FROM gcr.io/distroless/static AS final
+# TODO (Kevin): repalce with distroless/static later
+# reuse golang for debugging purposes
+FROM golang:1.23 AS final
+
+LABEL maintainer="DIMO <hello@dimo.zone>"
+
+USER nonroot:nonroot
+
+COPY --from=build --chown=nonroot:nonroot /build/bin/dps /
+COPY --from=build --chown=nonroot:nonroot /build/docker/docker-config.yaml /benthos.yaml
+
+ENTRYPOINT ["/dps"]
+CMD ["-c", "/benthos.yaml"]
