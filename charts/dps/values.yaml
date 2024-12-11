@@ -5,12 +5,12 @@
 replicaCount: 1
 
 image:
-  repository: dimozone/benthos-plugin
+  repository: dimozone/dps
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "2954eea"
   command:
-    - "/benthos-plugin"
+    - "/dps"
   args:
     - '-w'
     - '-r'
