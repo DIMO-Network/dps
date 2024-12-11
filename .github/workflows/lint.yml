@@ -1,0 +1,26 @@
+name: golangci-lint
+on:
+  pull_request:
+    branches: ["**"]
+jobs:
+  golangci:
+    runs-on: "ubuntu-24.04"
+
+    name: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: install golangci-lint
+        run: make tools-golangci-lint
+
+      - name: tidy
+        run: go mod tidy
+
+      - name: build
+        run: go build
+
+      - name: Run golangci-lint
+        run: make lint
