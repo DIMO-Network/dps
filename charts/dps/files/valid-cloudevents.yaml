@@ -21,6 +21,10 @@ pipeline:
             message: 'MessageReceived'
             fields_mapping: |
               root.payload = this
+    - label: "convert_token"
+      bloblang: |
+        root = this 
+        root.time = this.time.ts_format("2006-01-02 15:04:05.999999", "UTC")
 
 output:
   label: "insert_valid_cloudevent"
