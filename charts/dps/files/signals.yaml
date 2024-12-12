@@ -21,10 +21,6 @@ pipeline:
             message: 'MessageReceived'
             fields_mapping: |
               root.payload = this
-    - label: "convert_token"
-      bloblang: |
-        root = this 
-        root.payload.0 = this.payload.index(0).uint32()
 
 output:
   label: "insert_signal"
