@@ -39,6 +39,7 @@ func (p processor) ProcessBatch(_ context.Context, msgs service.MessageBatch) ([
 		}
 		valSlice, ok := values.([][]any)
 		if !ok {
+			fmt.Printf("index values data: %v\n", values)
 			return nil, fmt.Errorf("index values is not a slice of slices instead is %T", values)
 		}
 		for _, vals := range valSlice {
