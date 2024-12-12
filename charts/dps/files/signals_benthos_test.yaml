@@ -3,9 +3,9 @@ tests:
     target_processors: '/pipeline/processors'
     environment: { }
     input_batch:
-      - content: '{"payload": [431,"2024-12-12T16:00:33Z","lowVoltageBatteryCurrentVoltage", "0xF26421509Efe92861a587482100c6d728aBf1CD0",12.831,""]}'
+      - content: '{"tokenId":431,"timestamp":"2024-04-18T17:20:26.633Z","name":"powertrainCombustionEngineECT","valueNumber":107,"valueString":"","source":"0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF"}'
     output_batches:
-      - - json_contains: '{"payload": [431,"2024-12-12T16:00:33Z","lowVoltageBatteryCurrentVoltage", "0xF26421509Efe92861a587482100c6d728aBf1CD0",12.831,""]}'
+      - - json_equals: '[431,"2024-04-18T17:20:26.633Z","powertrainCombustionEngineECT", "0xbA5738a18d83D41847dfFbDC6101d37C69c9B0cF",107,""]'
  # - name: decompress wrong signature test
 #    target_processors: '/pipeline/processors'
 #    environment: { }

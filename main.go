@@ -22,6 +22,8 @@ import (
 
 	// Add our custom plugin packages here.
 	_ "github.com/DIMO-Network/dps/internal/processors/splitvalues"
+
+	_ "github.com/DIMO-Network/dps/internal/processors/signalstoslice"
 )
 
 func main() {
