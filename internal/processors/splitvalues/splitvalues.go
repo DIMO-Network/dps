@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	chindexer "github.com/DIMO-Network/nameindexer/pkg/clickhouse"
 
 	chindexer "github.com/DIMO-Network/nameindexer/pkg/clickhouse"
 	"github.com/redpanda-data/benthos/v4/public/service"
@@ -55,7 +56,7 @@ func (p processor) ProcessBatch(_ context.Context, msgs service.MessageBatch) ([
 				return nil, fmt.Errorf("failed to unmarshal values: %w", err)
 			}
 			newMsg := msg.Copy()
-			newMsg.SetStructured(vals)
+			newMsg.SetStructured(indexSlice)
 			retMsgs = append(retMsgs, newMsg)
 		}
 	}
