@@ -3,6 +3,10 @@ replicaCount: 3
 kafka:
   clusterName: kafka-prod-dimo-kafka
 
+podAnnotations:
+  config.linkerd.io/proxy-cpu-limit: 2000m
+  config.linkerd.io/proxy-cpu-request: 500m
+
 env:
   KAFKA_BOOTSTRAP_SERVERS: kafka-prod-dimo-kafka-kafka-bootstrap
   ENVIRONMENT: prod
@@ -13,11 +17,11 @@ ingress:
 
 resources:
   limits:
-    cpu: 500m
-    memory: 256Mi
+    cpu: 7000m
+    memory: 4000Mi
   requests:
-    cpu: 50m
-    memory: 128Mi
+    cpu: 7000m
+    memory: 4000Mi
 
 autoscaling:
   enabled: false
