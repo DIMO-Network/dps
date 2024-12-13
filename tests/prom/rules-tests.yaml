@@ -12,13 +12,13 @@ tests:
         values: '0 0 0 0 0 0 0 0 0 0 0 0 0' # 30m of no data
     alert_rule_test:
       - eval_time: 60m
-        alertname: NoCloudEventSentClickhouse
+        alertname: NoValidCloudEventSentClickhouse
         exp_alerts:
           - exp_labels:
               severity: critical
               namespace: dev
             exp_annotations:
-              summary: "No data sent to CH in the last 30 minutes"
+              summary: "No valid cloud events sent to CH in the last 30 minutes"
               description: "Please check dps service and networking."
 
   # Test for NoDataSentClickhouse alert
@@ -36,4 +36,3 @@ tests:
             exp_annotations:
               summary: "No data sent to Clickhouse in the last 30 minutes"
               description: "Please check dps service and networking."
-

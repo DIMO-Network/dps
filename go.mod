@@ -4,11 +4,9 @@ go 1.23
 
 replace github.com/redpanda-data/benthos/v4 => github.com/DIMO-Network/benthos/v4 v4.0.0-20241114162018-a6d7d6d4a681
 
-replace github.com/DIMO-Network/nameindexer => github.com/DIMO-Network/nameindexer v0.0.13-0.20241212215526-c6977611b7e9
-
 require (
 	github.com/DIMO-Network/model-garage v0.4.5
-	github.com/DIMO-Network/nameindexer v0.0.12
+	github.com/DIMO-Network/nameindexer v0.0.13
 	github.com/redpanda-data/benthos/v4 v4.38.0
 	github.com/redpanda-data/connect/v4 v4.37.0
 	github.com/stretchr/testify v1.10.0

@@ -6,7 +6,7 @@ input:
     topics:
       - '${DEVICE_VALID_CE_TOPIC:topic.device.validcloudevents}'
     consumer_group: "zone.dimo.export.validcloudevents"
-    client_id: ${CONTAINER_NAME:localhost}-dps-status
+    client_id: ${CONTAINER_NAME:localhost}-dps-valid-ce
     rack_id: ${NODE_NAME:localhost}
     commit_period: 1s
     fetch_buffer_cap: 500
