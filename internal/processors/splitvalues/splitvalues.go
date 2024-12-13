@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	chindexer "github.com/DIMO-Network/nameindexer/pkg/clickhouse"
 
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
@@ -46,19 +47,29 @@ func (p processor) ProcessBatch(_ context.Context, msgs service.MessageBatch) ([
 		}
 
 		// Variable to hold the result
-		var valSlice [][]interface{}
+		var valSlice [][]string
 
 		// Parse the JSON string
 		err := json.Unmarshal([]byte(valuesStr), &valSlice)
 		if err != nil {
 			fmt.Println("Error parsing JSON:", err)
-			fmt.Printf("index values data: %v\n", values)
+			//fmt.Printf("index values data: %v\n", values)
 			return nil, fmt.Errorf("index values is not a slice of slices instead is %T", values)
 		}
 
 		for _, vals := range valSlice {
+			marsh, err := json.Marshal(vals)
+			if err != nil {
+				fmt.Println("Error marshalling JSON:", err)
+			}
+
+			indexSlice, err := chindexer.UnmarshalIndexSlice(marsh)
+			if err != nil {
+				return nil, fmt.Errorf("failed to unmarshal index slice: %w", err)
+			}
+
 			newMsg := msg.Copy()
-			newMsg.SetStructured(vals)
+			newMsg.SetStructured(indexSlice)
 			retMsgs = append(retMsgs, newMsg)
 		}
 	}
