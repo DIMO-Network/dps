@@ -58,14 +58,15 @@ func (p processor) ProcessBatch(_ context.Context, msgs service.MessageBatch) ([
 		}
 
 		for _, vals := range valSlice {
-			marsh, err := json.Marshal(vals)
-			if err != nil {
-				fmt.Println("Error marshalling JSON:", err)
+			marsh, errMarsh := json.Marshal(vals)
+			if errMarsh != nil {
+
+				fmt.Println("Error marshalling JSON:", errMarsh)
 			}
 
-			indexSlice, err := chindexer.UnmarshalIndexSlice(marsh)
-			if err != nil {
-				return nil, fmt.Errorf("failed to unmarshal index slice: %w", err)
+			indexSlice, errUnMarsh := chindexer.UnmarshalIndexSlice(marsh)
+			if errUnMarsh != nil {
+				return nil, fmt.Errorf("failed to unmarshal index slice: %w", errUnMarsh)
 			}
 
 			newMsg := msg.Copy()
