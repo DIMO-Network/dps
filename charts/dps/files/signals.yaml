@@ -6,7 +6,7 @@ input:
     topics:
       - '${DEVICE_SIGNALS_TOPIC:topic.device.signals}'
     consumer_group: "zone.dimo.export.signals"
-    client_id: ${CONTAINER_NAME:localhost}-dps-status
+    client_id: ${CONTAINER_NAME:localhost}-dps-signals
     rack_id: ${NODE_NAME:localhost}
     commit_period: 1s
     fetch_buffer_cap: 500
