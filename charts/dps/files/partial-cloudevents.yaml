@@ -62,7 +62,7 @@ output:
                   batching:
                     count: 100000
                     byte_size: 0
-                    period: "1s"
+                    period: "100ms"
                     check: ""
                 processors:
                   - label: "split_values_partial"
