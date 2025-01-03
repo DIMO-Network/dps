@@ -57,7 +57,7 @@ output:
                 sql_insert:
                   driver: clickhouse
                   dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s&max_execution_time=300
-                  table: name_index
+                  table: cloud_event
                   columns: []
                   args_mapping: root = this
                   batching:
