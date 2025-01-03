@@ -6,7 +6,7 @@ replace github.com/redpanda-data/benthos/v4 => github.com/DIMO-Network/benthos/v
 
 require (
 	github.com/DIMO-Network/model-garage v0.4.5
-	github.com/DIMO-Network/nameindexer v0.0.14-0.20250102172234-5b6c47902928
+	github.com/DIMO-Network/nameindexer v0.1.0
 	github.com/redpanda-data/benthos/v4 v4.38.0
 	github.com/redpanda-data/connect/v4 v4.37.0
 	github.com/stretchr/testify v1.10.0
