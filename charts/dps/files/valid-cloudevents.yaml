@@ -37,6 +37,8 @@ output:
                   region: us-east-2
                   max_in_flight: 250
                   timeout: 30s
+                  metadata:
+                    exclude_prefixes: ["dimo_cloudevent_index"]
                   credentials:
                     id: ${S3_AWS_ACCESS_KEY_ID}
                     secret: ${S3_AWS_SECRET_ACCESS_KEY}
