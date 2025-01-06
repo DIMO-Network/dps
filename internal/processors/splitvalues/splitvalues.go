@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/DIMO-Network/model-garage/pkg/cloudevent"
+	"github.com/DIMO-Network/nameindexer"
 	"github.com/DIMO-Network/nameindexer/pkg/clickhouse"
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
@@ -91,6 +93,31 @@ func createLegacyMessage(msg *service.Message, rawValues []byte) ([]*service.Mes
 		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal old index values: %w", err)
 		}
+		decodedSubject, err := nameindexer.DecodeNFTDIDIndex(vals[0].(string))
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode subject: %w", err)
+		}
+		decodedSource, err := nameindexer.DecodeAddress(vals[3].(string))
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode source: %w", err)
+		}
+		decodedProducer, err := nameindexer.DecodeNFTDIDIndex(vals[6].(string))
+		if err != nil {
+			return nil, fmt.Errorf("failed to decode subject: %w", err)
+		}
+		oldIndex := nameindexer.Index{
+			Subject:         decodedSubject.String(),
+			Timestamp:       vals[1].(time.Time),
+			PrimaryFiller:   nameindexer.DecodePrimaryFiller(vals[2].(string)),
+			Source:          decodedSource.String(),
+			DataType:        nameindexer.DecodeDataType(vals[4].(string)),
+			SecondaryFiller: nameindexer.DecodeSecondaryFiller(vals[5].(string)),
+			Producer:        decodedProducer.String(),
+			Optional:        vals[7].(string),
+		}
+		key := vals[8].(string)
+		vals = clickhouse.IndexToSliceWithKey(&oldIndex, key)
+
 		newMsg := msg.Copy()
 		newMsg.SetStructured(vals)
 		retMsgs = append(retMsgs, newMsg)
