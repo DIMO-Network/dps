@@ -30,6 +30,12 @@ func TestProcessBatch(t *testing.T) {
 			expectedCount: 1,
 		},
 		{
+			name:          "valid partial legacy format",
+			indexValue:    `[["", "2024-12-12T16:00:33Z", "MA", "F26421509Efe92861a587482100c6d728aBf1CD0", "!!!!!!!!!!!!!!r/v0/s","00", "0000000000013882325b45949C833986bC98e98a49F3CA5C5c4643B50000000e", "", "000000000001388245fbCD3ef7361d156e8b16F5538AE36DEdf61Da8000001af758787160033MAF26421509Efe92861a587482100c6d728aBf1CD0!!!!!!!!!!!!!!r/v0/s000000000000013882325b45949C833986bC98e98a49F3CA5C5c4643B50000000e"]]`,
+			indexKey:      "test_index",
+			expectedCount: 1,
+		},
+		{
 			name:          "missing index values",
 			indexValue:    "",
 			indexKey:      "test_index",
