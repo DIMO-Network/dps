@@ -2,7 +2,7 @@ replicaCount: 1
 image:
   repository: dimozone/dps
   pullPolicy: IfNotPresent
-  tag: '8658927'
+  tag: db60723
   command:
     - /dps
   args:
