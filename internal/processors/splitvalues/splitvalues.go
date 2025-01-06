@@ -93,26 +93,29 @@ func createLegacyMessage(msg *service.Message, rawValues []byte) ([]*service.Mes
 		if err != nil {
 			return nil, fmt.Errorf("failed to unmarshal old index values: %w", err)
 		}
-		decodedSubject, err := nameindexer.DecodeNFTDIDIndex(vals[0].(string))
-		if err != nil {
-			return nil, fmt.Errorf("failed to decode subject: %w", err)
+		subject := vals[0].(string)
+		decodedSubject, err := nameindexer.DecodeNFTDIDIndex(subject)
+		if err == nil {
+			subject = decodedSubject.String()
 		}
-		decodedSource, err := nameindexer.DecodeAddress(vals[3].(string))
-		if err != nil {
-			return nil, fmt.Errorf("failed to decode source: %w", err)
+		source := vals[3].(string)
+		decodedSource, err := nameindexer.DecodeAddress(source)
+		if err == nil {
+			source = decodedSource.String()
 		}
-		decodedProducer, err := nameindexer.DecodeNFTDIDIndex(vals[6].(string))
-		if err != nil {
-			return nil, fmt.Errorf("failed to decode subject: %w", err)
+		producer := vals[6].(string)
+		decodedProducer, err := nameindexer.DecodeNFTDIDIndex(producer)
+		if err == nil {
+			producer = decodedProducer.String()
 		}
 		oldIndex := nameindexer.Index{
-			Subject:         decodedSubject.String(),
+			Subject:         subject,
 			Timestamp:       vals[1].(time.Time),
 			PrimaryFiller:   nameindexer.DecodePrimaryFiller(vals[2].(string)),
-			Source:          decodedSource.String(),
+			Source:          source,
 			DataType:        nameindexer.DecodeDataType(vals[4].(string)),
 			SecondaryFiller: nameindexer.DecodeSecondaryFiller(vals[5].(string)),
-			Producer:        decodedProducer.String(),
+			Producer:        producer,
 			Optional:        vals[7].(string),
 		}
 		key := vals[8].(string)
