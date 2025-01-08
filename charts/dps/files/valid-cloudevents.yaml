@@ -17,10 +17,11 @@ pipeline:
     - label: "inputlogger"
       for_each:
         - log:
-            level: DEBUG
+            level: INFO
             message: 'MessageReceived'
             fields_mapping: |
               root.payload = this
+              root.all_metadata = metadata()
 
 output:
   label: "insert_valid_cloudevent"
