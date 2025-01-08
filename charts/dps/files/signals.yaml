@@ -9,8 +9,8 @@ input:
     client_id: ${CONTAINER_NAME:localhost}-dps-signals
     rack_id: ${NODE_NAME:localhost}
     commit_period: 1s
-    fetch_buffer_cap: 500
-    checkpoint_limit: 500
+    fetch_buffer_cap: 1000
+    checkpoint_limit: 1000
 
 pipeline:
   processors:
@@ -35,7 +35,7 @@ output:
         columns: []
         args_mapping: root = this
         batching:
-          count: 10000
+          count: 20000
           byte_size: 0
           period: "10ms"
           check: ""
