@@ -2,8 +2,6 @@ module github.com/DIMO-Network/dps
 
 go 1.24
 
-replace github.com/redpanda-data/benthos/v4 => github.com/DIMO-Network/benthos/v4 v4.0.0-20241114162018-a6d7d6d4a681
-
 require (
 	github.com/DIMO-Network/model-garage v0.4.9
 	github.com/DIMO-Network/nameindexer v0.1.0

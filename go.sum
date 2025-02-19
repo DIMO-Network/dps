@@ -54,8 +54,6 @@ github.com/ClickHouse/clickhouse-go/v2 v2.30.0 h1:AG4D/hW39qa58+JHQIFOSnxyL46H6h
 github.com/ClickHouse/clickhouse-go/v2 v2.30.0/go.mod h1:i9ZQAojcayW3RsdCb3YR+n+wC2h65eJsZCscZ1Z1wyo=
 github.com/Code-Hex/go-generics-cache v1.5.1 h1:6vhZGc5M7Y/YD8cIUcY8kcuQLB4cHR7U+0KMqAA0KcU=
 github.com/Code-Hex/go-generics-cache v1.5.1/go.mod h1:qxcC9kRVrct9rHeiYpFWSoW1vxyillCVzX13KZG8dl4=
-github.com/DIMO-Network/benthos/v4 v4.0.0-20241114162018-a6d7d6d4a681 h1:sYiDURska7A+4ldV6+CCBcWIrL+IHmqXliqeuehQyKA=
-github.com/DIMO-Network/benthos/v4 v4.0.0-20241114162018-a6d7d6d4a681/go.mod h1:A5izknIGyzs16rCU0qliFVgdCLn2yyvLM4Hltx+s+TI=
 github.com/DIMO-Network/model-garage v0.4.9 h1:cNJEss1himKciJOFcw9T89w+yIuWqKMImiZLLHdheW0=
 github.com/DIMO-Network/model-garage v0.4.9/go.mod h1:LjGMInWgEXo/cDZK72qvkJXY1bJiRBSrsnSHaD2dgg8=
 github.com/DIMO-Network/nameindexer v0.1.0 h1:OZi3mmZ+v4PDw89quAy6/Ty0O31ngB1Ouo+Ng+bMdM0=
@@ -753,6 +751,8 @@ github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 h1:N/ElC8H3+5X
 github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475/go.mod h1:bCqnVzQkZxMG4s8nGwiZ5l3QUCyqpo9Y+/ZMZ9VjZe4=
 github.com/redis/go-redis/v9 v9.7.0 h1:HhLSs+B6O021gwzl+locl0zEDnyNkxMtf/Z3NNBMa9E=
 github.com/redis/go-redis/v9 v9.7.0/go.mod h1:f6zhXITC7JUJIlPEiBOTXxJgPLdZcA93GewI7inzyWw=
+github.com/redpanda-data/benthos/v4 v4.38.0 h1:YQJ9spurFLGVPdf/+kB2AUWFOolEHBKEn34lhTnLHuI=
+github.com/redpanda-data/benthos/v4 v4.38.0/go.mod h1:A5izknIGyzs16rCU0qliFVgdCLn2yyvLM4Hltx+s+TI=
 github.com/redpanda-data/connect/v4 v4.37.0 h1:U/w5jzBXXDrj4VhO87yuIeM9u+BbQXNl3FblK2mYJWM=
 github.com/redpanda-data/connect/v4 v4.37.0/go.mod h1:E8o9GsLzVfeQrUlUbvN3snFod9reE6BycMRBaXe27m8=
 github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec h1:W09IVJc94icq4NjY3clb7Lk8O1qJ8BdBEF8z0ibU0rE=
