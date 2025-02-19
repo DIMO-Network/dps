@@ -1,4 +1,4 @@
-.PHONY: clean build install dep test lint format tools-golangci-lint tools-promtool tools help
+.PHONY: clean build install dep test lint format tools-golangci-lint tools help
 
 SHELL := /bin/sh
 PATHINSTBIN = $(abspath ./bin)
@@ -12,8 +12,6 @@ ARCH						?= $(DEFAULT_ARCH)
 GOOS						?= $(DEFAULT_GOOS)
 .DEFAULT_GOAL 				:= test
 
-# Dependency versions
-PROMETHEUS_VERSION = 2.47.0
 
 GOOS := $(shell go env GOOS)
 GOARCH := $(shell go env GOARCH)
@@ -73,18 +71,11 @@ test: test-go test-prom ## run all tests
 
 test-prom: ## run prometheus tests
 	sed "s/{{ .Release.Namespace }}/dev/g"  ./charts/dps/templates/alerts.yaml |  sed 's/{{.*}}//g' >  tests/prom/alerts-modified.yaml
-	promtool check rules tests/prom/alerts-modified.yaml
-	promtool test rules tests/prom/rules-tests.yaml
-
-tools-promtool: ## install promtools
-	mkdir -p $(PATHINSTBIN)
-	wget $(PROMETHEUS_URL) -O $(PATHINSTBIN)/$(PROMETHEUS_TAR)
-	tar -xvf $(PATHINSTBIN)/$(PROMETHEUS_TAR) -C $(PATHINSTBIN)
-	cp $(PATHINSTBIN)/prometheus-$(PROMETHEUS_VERSION).$(GOOS)-$(GOARCH)/promtool $(PATHINSTBIN)
-	rm -rf $(PATHINSTBIN)/$(PROMETHEUS_TAR) $(PATHINSTBIN)/prometheus-$(PROMETHEUS_VERSION).$(GOOS)-$(GOARCH)
+	go tool promtool check rules tests/prom/alerts-modified.yaml
+	go tool promtool test rules tests/prom/rules-tests.yaml
 
 tools-golangci-lint:
 	@mkdir -p $(PATHINSTBIN)
 	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(PATHINSTBIN) $(GOLANGCI_VERSION)
 
-make tools: tools-promtool ## install all tools
+make tools: tools-golangci-lint ## install tools
