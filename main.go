@@ -21,9 +21,9 @@ import (
 	_ "github.com/redpanda-data/connect/v4/public/components/prometheus"
 
 	// Add our custom plugin packages here.
-	_ "github.com/DIMO-Network/dps/internal/processors/splitvalues"
-
+	_ "github.com/DIMO-Network/dps/internal/processors/dbmigration"
 	_ "github.com/DIMO-Network/dps/internal/processors/signalstoslice"
+	_ "github.com/DIMO-Network/dps/internal/processors/splitvalues"
 )
 
 func main() {

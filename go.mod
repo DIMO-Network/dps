@@ -3,6 +3,8 @@ module github.com/DIMO-Network/dps
 go 1.24
 
 require (
+	github.com/ClickHouse/clickhouse-go/v2 v2.30.0
+	github.com/DIMO-Network/clickhouse-infra v0.0.3
 	github.com/DIMO-Network/model-garage v0.4.9
 	github.com/DIMO-Network/nameindexer v0.1.0
 	github.com/redpanda-data/benthos/v4 v4.38.0
@@ -26,7 +28,6 @@ require (
 	github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v1.4.0 // indirect
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.3.2 // indirect
 	github.com/ClickHouse/ch-go v0.61.5 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.30.0 // indirect
 	github.com/Code-Hex/go-generics-cache v1.5.1 // indirect
 	github.com/IBM/sarama v1.43.3 // indirect
 	github.com/Jeffail/checkpoint v1.0.1 // indirect
@@ -178,7 +179,6 @@ require (
 	github.com/ionos-cloud/sdk-go/v6 v6.3.2 // indirect
 	github.com/itchyny/gojq v0.12.16 // indirect
 	github.com/itchyny/timefmt-go v0.1.6 // indirect
-	github.com/jackc/pgx/v5 v5.7.1 // indirect
 	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
 	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
 	github.com/jcmturner/gofork v1.7.6 // indirect
@@ -204,6 +204,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mdlayher/socket v0.4.1 // indirect
 	github.com/mdlayher/vsock v1.2.1 // indirect
+	github.com/mfridman/interpolate v0.0.2 // indirect
 	github.com/microsoft/gocosmos v1.1.1 // indirect
 	github.com/miekg/dns v1.1.63 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -232,6 +233,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/pressly/goose/v3 v3.24.1 // indirect
 	github.com/prometheus/alertmanager v0.28.0 // indirect
 	github.com/prometheus/client_golang v1.21.0-rc.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
@@ -250,6 +252,7 @@ require (
 	github.com/scaleway/scaleway-sdk-go v1.0.0-beta.30 // indirect
 	github.com/segmentio/asm v1.2.0 // indirect
 	github.com/segmentio/ksuid v1.0.4 // indirect
+	github.com/sethvargo/go-retry v0.3.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/sijms/go-ora/v2 v2.8.19 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
@@ -329,9 +332,10 @@ require (
 	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340 // indirect
 	k8s.io/utils v0.0.0-20240711033017-18e509b52bc8 // indirect
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
+	modernc.org/libc v1.55.3 // indirect
 	modernc.org/mathutil v1.6.0 // indirect
 	modernc.org/memory v1.8.0 // indirect
-	modernc.org/sqlite v1.33.0 // indirect
+	modernc.org/sqlite v1.34.1 // indirect
 	modernc.org/strutil v1.2.0 // indirect
 	modernc.org/token v1.1.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
