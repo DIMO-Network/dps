@@ -111,16 +111,16 @@ kafka:
         segment.ms: '3600000'
         compression.type: producer
         cleanup.policy: delete
-        retention.ms: '43200000'
+        retention.ms: '7200000'
     - name: topic.device.validcloudevents
       config:
         segment.ms: '3600000'
         compression.type: producer
         cleanup.policy: delete
-        retention.ms: '43200000'
+        retention.ms: '7200000'
     - name: topic.device.partialcloudevents
       config:
         segment.ms: '3600000'
         compression.type: producer
         cleanup.policy: delete
-        retention.ms: '43200000'
+        retention.ms: '7200000'
