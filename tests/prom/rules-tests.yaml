@@ -6,33 +6,33 @@ evaluation_interval: 1m
 tests:
 
   # Test for NoCloudEventSentClickhouse alert
-#  - interval: 6m
-#    input_series:
-#      - series: 'output_batch_sent{namespace="dev", container="dps", label="insert_valid_cloudevent_clickhouse"}'
-#        values: '0 0 0 0 0 0 0 0 0 0 0 0 0' # 30m of no data
-#    alert_rule_test:
-#      - eval_time: 60m
-#        alertname: NoValidCloudEventSentClickhouse
-#        exp_alerts:
-#          - exp_labels:
-#              severity: critical
-#              namespace: dev
-#            exp_annotations:
-#              summary: "No valid cloud events sent to CH in the last 30 minutes"
-#              description: "Please check dps service and networking."
-#
-#  # Test for NoDataSentClickhouse alert
-#  - interval: 6m
-#    input_series:
-#      - series: 'output_batch_sent{namespace="dev", container="dps", label="insert_signal_clickhouse"}'
-#        values: '35 35 35 35 35 35 35'  # 30m of no data
-#    alert_rule_test:
-#      - eval_time: 60m
-#        alertname: NoSignalsSentClickhouse
-#        exp_alerts:
-#          - exp_labels:
-#              severity: critical
-#              namespace: dev
-#            exp_annotations:
-#              summary: "No data sent to Clickhouse in the last 30 minutes"
-#              description: "Please check dps service and networking."
+  - interval: 6m
+    input_series:
+      - series: 'output_batch_sent{namespace="dev", container="dps", label="insert_valid_cloudevent_clickhouse"}'
+        values: '0 0 0 0 0 0 0 0 0 0 0 0 0' # 30m of no data
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: NoValidCloudEventSentClickhouse
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              namespace: dev
+            exp_annotations:
+              summary: "No valid cloud events sent to CH in the last 30 minutes"
+              description: "Please check dps service and networking."
+
+  # Test for NoDataSentClickhouse alert
+  - interval: 6m
+    input_series:
+      - series: 'output_batch_sent{namespace="dev", container="dps", label="insert_signal_clickhouse"}'
+        values: '35 35 35 35 35 35 35 35 35 35 35 35'  # 30m of no data
+    alert_rule_test:
+      - eval_time: 60m
+        alertname: NoSignalsSentClickhouse
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              namespace: dev
+            exp_annotations:
+              summary: "No data sent to Clickhouse in the last 30 minutes"
+              description: "Please check dps service and networking."
