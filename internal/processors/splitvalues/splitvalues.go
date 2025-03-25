@@ -5,11 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"time"
 
-	"github.com/DIMO-Network/model-garage/pkg/cloudevent"
-	"github.com/DIMO-Network/nameindexer"
-	"github.com/DIMO-Network/nameindexer/pkg/clickhouse"
+	"github.com/DIMO-Network/cloudevent"
+	"github.com/DIMO-Network/cloudevent/pkg/clickhouse"
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
 
@@ -56,11 +54,6 @@ func (p processor) ProcessBatch(_ context.Context, msgs service.MessageBatch) ([
 		hdrs := []*cloudevent.CloudEventHeader{}
 		err := json.Unmarshal(rawValues, &hdrs)
 		if err != nil {
-			newMsgs, legacyErr := createLegacyMessage(msg, rawValues)
-			if legacyErr == nil {
-				retMsgs = append(retMsgs, newMsgs...)
-				continue
-			}
 			return nil, fmt.Errorf("failed to unmarshal cloud event headers: %w", err)
 		}
 
@@ -76,54 +69,4 @@ func (p processor) ProcessBatch(_ context.Context, msgs service.MessageBatch) ([
 		}
 	}
 	return []service.MessageBatch{retMsgs}, nil
-}
-
-// TODO: This can be removed when the topic no longer sends old index values
-func createLegacyMessage(msg *service.Message, rawValues []byte) ([]*service.Message, error) {
-	valSlices := []json.RawMessage{}
-	err := json.Unmarshal(rawValues, &valSlices)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal old index values: %w", err)
-	}
-	retMsgs := make([]*service.Message, 0, len(valSlices))
-	for _, rawVals := range valSlices {
-		var vals []any
-		var err error
-		vals, err = clickhouse.UnmarshalIndexSlice(rawVals)
-		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal old index values: %w", err)
-		}
-		subject := vals[0].(string)
-		decodedSubject, err := nameindexer.DecodeNFTDIDIndex(subject)
-		if err == nil {
-			subject = decodedSubject.String()
-		}
-		source := vals[3].(string)
-		decodedSource, err := nameindexer.DecodeAddress(source)
-		if err == nil {
-			source = decodedSource.String()
-		}
-		producer := vals[6].(string)
-		decodedProducer, err := nameindexer.DecodeNFTDIDIndex(producer)
-		if err == nil {
-			producer = decodedProducer.String()
-		}
-		oldIndex := nameindexer.Index{
-			Subject:         subject,
-			Timestamp:       vals[1].(time.Time),
-			PrimaryFiller:   nameindexer.DecodePrimaryFiller(vals[2].(string)),
-			Source:          source,
-			DataType:        nameindexer.DecodeDataType(vals[4].(string)),
-			SecondaryFiller: nameindexer.DecodeSecondaryFiller(vals[5].(string)),
-			Producer:        producer,
-			Optional:        vals[7].(string),
-		}
-		key := vals[8].(string)
-		vals = clickhouse.IndexToSliceWithKey(&oldIndex, key)
-
-		newMsg := msg.Copy()
-		newMsg.SetStructured(vals)
-		retMsgs = append(retMsgs, newMsg)
-	}
-	return retMsgs, nil
 }

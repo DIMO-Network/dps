@@ -7,8 +7,8 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/DIMO-Network/clickhouse-infra/pkg/migrate"
+	indexmigrations "github.com/DIMO-Network/cloudevent/pkg/clickhouse/migrations"
 	sigmigrations "github.com/DIMO-Network/model-garage/pkg/migrations"
-	indexmigrations "github.com/DIMO-Network/nameindexer/pkg/clickhouse/migrations"
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
 
