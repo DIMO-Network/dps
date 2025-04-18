@@ -65,9 +65,9 @@ output:
                   columns: []
                   args_mapping: root = this
                   batching:
-                    count: 100000
+                    count: 500000
                     byte_size: 0
-                    period: "1s"
+                    period: "2s"
                     check: ""
                 processors:
                   - label: "split_values_valid"
