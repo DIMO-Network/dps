@@ -39,9 +39,9 @@ output:
         columns: []
         args_mapping: root = this
         batching:
-          count: 100000
+          count: 500000
           byte_size: 0
-          period: "1s"
+          period: "5s"
           check: ""
     # Drop the message, log, record metrics
     - label: "insert_signal_clickhouse_failure"
