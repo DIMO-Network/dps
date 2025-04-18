@@ -41,7 +41,7 @@ output:
         batching:
           count: 500000
           byte_size: 0
-          period: "5s"
+          period: "2s"
           check: ""
     # Drop the message, log, record metrics
     - label: "insert_signal_clickhouse_failure"
