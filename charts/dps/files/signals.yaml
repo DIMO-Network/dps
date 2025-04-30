@@ -14,6 +14,7 @@ input:
     fetch_max_partition_bytes: 10MiB
     commit_period: 2s
     checkpoint_limit: 1000000 # double the batch size for insertion
+    start_offset: "latest"
 
 pipeline:
   processors:
