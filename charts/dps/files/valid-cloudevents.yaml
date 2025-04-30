@@ -43,7 +43,7 @@ output:
                   bucket: ${S3_CLOUDEVENT_BUCKET}
                   path: ${!meta("dimo_cloudevent_index")}
                   content_type: application/json
-                  region: us-east-2
+                  region: ${S3_AWS_REGION}
                   max_in_flight: 250
                   timeout: 30s
                   metadata:
