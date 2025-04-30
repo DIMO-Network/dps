@@ -7,10 +7,10 @@ input:
       - '${DEVICE_PARTIAL_CE_TOPIC:topic.device.partialcloudevents}'
     consumer_group: "zone.dimo.export.partialcloudevents"
     client_id: ${CONTAINER_NAME:localhost}-dps-partial-ce
-    fetch_max_bytes: 500MiB
+    fetch_max_bytes: 100MiB
     fetch_max_wait: 50ms
     fetch_min_bytes: 1B
-    fetch_max_partition_bytes: 50MiB
+    fetch_max_partition_bytes: 10MiB
     rack_id: ${NODE_NAME:localhost}
     commit_period: 2s
     checkpoint_limit: 500000
