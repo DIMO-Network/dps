@@ -1,16 +1,20 @@
 input:
   label: kafka_input
-  kafka:
-    addresses:
+  kafka_franz:
+    seed_brokers:
       - ${KAFKA_BOOTSTRAP_SERVERS:localhost}:${KAFKA_BOOTSTRAP_PORT:9092}
     topics:
       - '${DEVICE_VALID_CE_TOPIC:topic.device.validcloudevents}'
-    consumer_group: "zone.dimo.export.validcloudevents"
+    consumer_group: "zone.dimo.dps.validcloudevents"
     client_id: ${CONTAINER_NAME:localhost}-dps-valid-ce
     rack_id: ${NODE_NAME:localhost}
-    commit_period: 1s
-    fetch_buffer_cap: 500
-    checkpoint_limit: 500
+    fetch_max_bytes: 100MiB
+    fetch_max_wait: 50ms
+    fetch_min_bytes: 1B
+    fetch_max_partition_bytes: 10MiB
+    commit_period: 2s
+    checkpoint_limit: 1000000 # double the batch size for insertion
+
 
 pipeline:
   processors:
