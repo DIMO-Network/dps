@@ -5,7 +5,7 @@ input:
       - ${KAFKA_BOOTSTRAP_SERVERS:localhost}:${KAFKA_BOOTSTRAP_PORT:9092}
     topics:
       - '${DEVICE_PARTIAL_CE_TOPIC:topic.device.partialcloudevents}'
-    consumer_group: "zone.dimo.export.partialcloudevents"
+    consumer_group: "zone.dimo.dps.partialcloudevents"
     client_id: ${CONTAINER_NAME:localhost}-dps-partial-ce
     fetch_max_bytes: 100MiB
     fetch_max_wait: 50ms
