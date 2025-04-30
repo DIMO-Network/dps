@@ -42,6 +42,7 @@ env:
   CLICKHOUSE_INDEX_DATABASE: file_index
   S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-dev
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-dev
+  S3_AWS_REGION: us-east-2
   LOG_LEVEL: DEBUG
 service:
   type: ClusterIP
