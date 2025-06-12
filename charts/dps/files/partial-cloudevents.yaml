@@ -80,8 +80,18 @@ output:
 
               # Drop the message, log, record metrics and send 500 response
               - label: 'insert_partial_cloudevent_clickhouse_failure'
-                drop: {}
-                processors:
-                  -  mutation: |
-                       meta dimo_component = "insert_partial_cloudevent_clickhouse"
-                  - resource: "handle_db_error"
+                switch:
+                  cases:
+                  # If the error is "driver: bad connection", reject the message so it will be retried
+                    - check: 'metadata("fallback_error").or("") == "driver: bad connection"'
+                      output:
+                        reject: metadata("fallback_error")
+                        processors:
+                          - resource: "handle_db_connection_error"
+                    - check: ''
+                      output:
+                        drop: {}
+                        processors:
+                          -  mutation: |
+                              meta dimo_component = "insert_signal_clickhouse"
+                          - resource: "handle_db_error"
