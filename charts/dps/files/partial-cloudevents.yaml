@@ -82,8 +82,8 @@ output:
               - label: 'insert_partial_cloudevent_clickhouse_failure'
                 switch:
                   cases:
-                  # If the error is "driver: bad connection", reject the message so it will be retried
-                    - check: 'metadata("fallback_error").or("") == "driver: bad connection"'
+                  # If the error contains "bad connection", reject the message so it will be retried
+                    - check: 'metadata("fallback_error").or("").contains("bad connection")'
                       output:
                         reject: metadata("fallback_error")
                         processors:
