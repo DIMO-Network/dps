@@ -8,13 +8,14 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/DIMO-Network/clickhouse-infra/pkg/migrate"
 	indexmigrations "github.com/DIMO-Network/cloudevent/pkg/clickhouse/migrations"
-	sigmigrations "github.com/DIMO-Network/model-garage/pkg/migrations"
+	modelgaragemigrations "github.com/DIMO-Network/model-garage/pkg/migrations"
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
 
 const (
 	indexMigrationProcName  = "dimo_file_index_migration"
 	signalMigrationProcName = "dimo_signal_migration"
+	eventMigrationProcName  = "dimo_event_migration"
 )
 
 var configSpec = service.NewConfigSpec().
@@ -24,6 +25,7 @@ var configSpec = service.NewConfigSpec().
 func init() {
 	Register(indexMigrationProcName)
 	Register(signalMigrationProcName)
+	Register(eventMigrationProcName)
 }
 
 // Register registers the processor with the service.
@@ -40,7 +42,9 @@ func ctor(procName string) func(*service.ParsedConfig, *service.Resources) (serv
 	case indexMigrationProcName:
 		registerFunc = indexmigrations.RegisterFuncs()
 	case signalMigrationProcName:
-		registerFunc = sigmigrations.RegisterFuncs()
+		registerFunc = modelgaragemigrations.RegisterFuncs()
+	case eventMigrationProcName:
+		registerFunc = modelgaragemigrations.RegisterFuncs()
 	}
 	return func(cfg *service.ParsedConfig, mgr *service.Resources) (service.BatchProcessor, error) {
 		migration, err := cfg.FieldString("dsn")
