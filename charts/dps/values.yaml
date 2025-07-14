@@ -40,6 +40,7 @@ env:
   CLICKHOUSE_PORT: 9440
   CLICKHOUSE_SIGNAL_DATABASE: dimo
   CLICKHOUSE_INDEX_DATABASE: file_index
+  CLICKHOUSE_EVENT_DATABASE: event_index
   S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-dev
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-dev
   S3_AWS_REGION: us-east-2

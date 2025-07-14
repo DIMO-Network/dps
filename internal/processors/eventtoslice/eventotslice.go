@@ -19,7 +19,7 @@ func init() {
 	constructor := func(_ *service.ParsedConfig, mgr *service.Resources) (service.Processor, error) {
 		return newEventProcessor(mgr.Logger()), nil
 	}
-	err := service.RegisterProcessor("convert_to_event", configSpec, constructor)
+	err := service.RegisterProcessor("event_to_slice", configSpec, constructor)
 	if err != nil {
 		panic(err)
 	}
