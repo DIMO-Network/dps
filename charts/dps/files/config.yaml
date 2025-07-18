@@ -6,7 +6,7 @@ logger:
   add_timestamp: true
   format: json
   static_fields:
-    'appname': zone.dimo.dps
+    'app': zone.dimo.dps
 
 metrics:
   prometheus: {}

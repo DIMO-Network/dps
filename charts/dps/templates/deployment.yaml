@@ -71,15 +71,12 @@ spec:
           resources:
 {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: signals
-              mountPath: /streams/signals.yaml
-              subPath: signals.yaml
-            - name: valid-cloudevents
-              mountPath: /streams/valid-cloudevents.yaml
-              subPath: valid-cloudevents.yaml
-            - name: partial-cloudevents
-              mountPath: /streams/partial-cloudevents.yaml
-              subPath: partial-cloudevents.yaml
+            {{- $files := .Files.Glob ("files/streams/*") }}
+            {{- range $path, $_ := $files }}
+            - name: {{ $path | base | replace "." "-" }}
+              mountPath: /streams/{{ $path | base }}
+              subPath: {{ $path | base }}
+            {{- end }}
             - name: config
               mountPath: /config
               subPath: config.yaml

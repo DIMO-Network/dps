@@ -1,4 +1,4 @@
-package signaltoslice
+package eventstoslice
 
 import (
 	"context"
@@ -9,51 +9,51 @@ import (
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
 
-type sliceProcessor struct {
+type eventSliceProcessor struct {
 	logger *service.Logger
 }
 
 func init() {
 	// Config spec is empty for now as we don't have any dynamic fields.
-	configSpec := service.NewConfigSpec().Description("Signal Json Object to slice.")
+	configSpec := service.NewConfigSpec().Description("Event Json Object to slice.")
 	constructor := func(_ *service.ParsedConfig, mgr *service.Resources) (service.Processor, error) {
-		return newSliceProcessor(mgr.Logger()), nil
+		return newEventSliceProcessor(mgr.Logger()), nil
 	}
-	err := service.RegisterProcessor("dimo_signal_to_slice", configSpec, constructor)
+	err := service.RegisterProcessor("dimo_event_to_slice", configSpec, constructor)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func newSliceProcessor(lgr *service.Logger) *sliceProcessor {
+func newEventSliceProcessor(lgr *service.Logger) *eventSliceProcessor {
 	// The logger will already be labelled with the
 	// identifier of this component within a config.
-	return &sliceProcessor{
+	return &eventSliceProcessor{
 		logger: lgr,
 	}
 }
 
-func (s *sliceProcessor) Process(_ context.Context, msg *service.Message) (service.MessageBatch, error) {
+func (s *eventSliceProcessor) Process(_ context.Context, msg *service.Message) (service.MessageBatch, error) {
 	// Extract the message payload as a byte slice.
 	payload, err := msg.AsBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	var signal vss.Signal
-	err = json.Unmarshal(payload, &signal)
+	var event vss.Event
+	err = json.Unmarshal(payload, &event)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
 
-	sig := vss.SignalToSlice(signal)
+	sig := vss.EventToSlice(event)
 	msgCpy := msg.Copy()
 	msgCpy.SetStructured(sig)
 
 	return []*service.Message{msgCpy}, nil
 }
 
-func (p *sliceProcessor) Close(ctx context.Context) error {
+func (p *eventSliceProcessor) Close(ctx context.Context) error {
 	return nil
 }

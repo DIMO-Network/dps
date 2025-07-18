@@ -33,12 +33,13 @@ securityContext:
 env:
   KAFKA_BOOTSTRAP_SERVERS: kafka-dev-dimo-kafka-kafka-brokers
   DEVICE_SIGNALS_TOPIC: topic.device.signals
+  DEVICE_EVENTS_TOPIC: topic.device.events
   DEVICE_VALID_CE_TOPIC: topic.device.validcloudevents
   DEVICE_PARTIAL_CE_TOPIC: topic.device.partialcloudevents
   ELASTIC_MULTIPLE_NODE: false
   ENVIRONMENT: dev
   CLICKHOUSE_PORT: 9440
-  CLICKHOUSE_SIGNAL_DATABASE: dimo
+  CLICKHOUSE_DIMO_DATABASE: dimo
   CLICKHOUSE_INDEX_DATABASE: file_index
   S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-dev
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-dev
@@ -108,6 +109,12 @@ kafka:
   clusterName: kafka-dev-dimo-kafka
   topics:
     - name: topic.device.signals
+      config:
+        segment.ms: '3600000'
+        compression.type: producer
+        cleanup.policy: delete
+        retention.ms: '7200000'
+    - name: topic.device.events
       config:
         segment.ms: '3600000'
         compression.type: producer

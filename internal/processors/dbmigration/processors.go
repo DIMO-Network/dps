@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	indexMigrationProcName  = "dimo_file_index_migration"
-	signalMigrationProcName = "dimo_signal_migration"
+	indexMigrationProcName  = "dimo_file_index_db_migration"
+	signalMigrationProcName = "dimo_db_migration"
 )
 
 var configSpec = service.NewConfigSpec().

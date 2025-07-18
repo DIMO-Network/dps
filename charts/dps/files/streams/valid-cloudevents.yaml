@@ -20,7 +20,7 @@ input:
 pipeline:
   processors:
     - label: "file_index_migration"
-      dimo_file_index_migration:
+      dimo_file_index_db_migration:
         dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s
 
     - label: "inputlogger"

@@ -19,8 +19,8 @@ input:
 pipeline:
   processors:
     - label: signal_db_migration
-      dimo_signal_migration:
-        dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_SIGNAL_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s
+      dimo_db_migration:
+        dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_DIMO_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s
 
     - label: "inputlogger"
       for_each:
@@ -29,8 +29,8 @@ pipeline:
             message: 'MessageReceived'
             fields_mapping: |
               root.payload = this
-    - label: "convert_to_slice"
-      signal_to_slice:
+    - label: "convert_signals_to_slice"
+      dimo_signal_to_slice:
 
 output:
   label: "insert_signal"
@@ -38,7 +38,7 @@ output:
     - label: "insert_signal_clickhouse"
       sql_insert:
         driver: clickhouse
-        dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_SIGNAL_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&max_execution_time=600
+        dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_DIMO_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&max_execution_time=600
         table: signal
         columns: []
         args_mapping: root = this
