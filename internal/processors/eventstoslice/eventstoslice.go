@@ -40,18 +40,20 @@ func (s *eventSliceProcessor) Process(_ context.Context, msg *service.Message) (
 		return nil, err
 	}
 
-	var event vss.Event
+	var event []vss.Event
 	err = json.Unmarshal(payload, &event)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
 	}
-
-	sig := vss.EventToSlice(event)
-	msgCpy := msg.Copy()
-	msgCpy.SetStructured(sig)
-
-	return []*service.Message{msgCpy}, nil
+	msgs := make([]*service.Message, 0, len(event))
+	for _, e := range event {
+		sig := vss.EventToSlice(e)
+		msgCpy := msg.Copy()
+		msgCpy.SetStructured(sig)
+		msgs = append(msgs, msgCpy)
+	}
+	return msgs, nil
 }
 
 func (p *eventSliceProcessor) Close(ctx context.Context) error {
