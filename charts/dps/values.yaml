@@ -8,9 +8,9 @@ image:
   args:
     - '-w'
     - '-r'
-    - /resources/resources.yaml
+    - /config/resources.yaml
     - '-c'
-    - /config/
+    - /config/config.yaml
     - streams
     - /streams/
 imagePullSecrets: []

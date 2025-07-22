@@ -78,31 +78,33 @@ spec:
               subPath: {{ $path | base }}
             {{- end }}
             - name: config
-              mountPath: /config
+              mountPath: /config/config.yaml
               subPath: config.yaml
             - name: resources
-              mountPath: /resources/resources.yaml
+              mountPath: /config/resources.yaml
               subPath: resources.yaml
 
       volumes:
-        - name: signals
+        {{- range $path, $_ := $files }}
+        - name: {{ $path | base | replace "." "-" }}
           configMap:
-            name: {{ include "dps.fullname" . }}-stream-config
+            name: {{ include "dis.fullname" $ }}-stream-config
             items:
-              - key: signals.yaml
-                path: signals.yaml
-        - name: valid-cloudevents
+              - key: {{ $path | base }}
+                path: {{ $path | base }}
+        {{- end }}
+        - name: config
           configMap:
-            name: {{ include "dps.fullname" . }}-stream-config
+            name: {{ include "dis.fullname" . }}-stream-config
             items:
-              - key: valid-cloudevents.yaml
-                path: valid-cloudevents.yaml
-        - name: partial-cloudevents
+              - key: config.yaml
+                path: config.yaml
+        - name: resources
           configMap:
-            name: {{ include "dps.fullname" . }}-stream-config
+            name: {{ include "dis.fullname" . }}-stream-config
             items:
-              - key: partial-cloudevents.yaml
-                path: partial-cloudevents.yaml
+              - key: resources.yaml
+                path: resources.yaml
         - name: config
           configMap:
             name: {{ include "dps.fullname" . }}-stream-config
