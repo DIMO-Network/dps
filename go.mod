@@ -6,7 +6,7 @@ require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.37.0
 	github.com/DIMO-Network/clickhouse-infra v0.0.3
 	github.com/DIMO-Network/cloudevent v0.1.2
-	github.com/DIMO-Network/model-garage v0.6.3
+	github.com/DIMO-Network/model-garage v0.6.5-0.20250722141225-d32307a6c9d8
 	github.com/redpanda-data/benthos/v4 v4.50.0
 	github.com/redpanda-data/connect/v4 v4.54.0
 	github.com/stretchr/testify v1.10.0
