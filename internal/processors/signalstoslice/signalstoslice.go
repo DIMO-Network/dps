@@ -1,4 +1,4 @@
-package signaltoslice
+package signalstoslice
 
 import (
 	"context"
@@ -37,14 +37,13 @@ func (s *sliceProcessor) Process(_ context.Context, msg *service.Message) (servi
 	// Extract the message payload as a byte slice.
 	payload, err := msg.AsBytes()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get signal message payload: %w", err)
 	}
 
 	var signal vss.Signal
 	err = json.Unmarshal(payload, &signal)
 	if err != nil {
-		fmt.Println(err)
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal signal: %w", err)
 	}
 
 	sig := vss.SignalToSlice(signal)

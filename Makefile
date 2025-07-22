@@ -55,7 +55,7 @@ dep:
 lint-benthos: build  ## Run Benthos linter
 	@CLICKHOUSE_HOST="" CLICKHOUSE_PORT="" CLICKHOUSE_DIMO_DATABASE="" CLICKHOUSE_INDEX_DATABASE=""  CLICKHOUSE_USER="" CLICKHOUSE_PASSWORD="" \
 		S3_AWS_ACCESS_KEY_ID="" S3_AWS_SECRET_ACCESS_KEY="" S3_CLOUDEVENT_BUCKET="" S3_EPHEMERAL_BUCKET="" S3_AWS_REGION="" \
-	dps lint -r ./charts/dps/files/resources.yaml ./charts/dps/files/config.yaml ./charts/dps/streams/*
+	dps lint -r ./charts/dps/files/resources.yaml ./charts/dps/files/config.yaml ./charts/dps/files/streams/*
 
 lint: lint-benthos ## Run linter for benthos config and go code
 	golangci-lint version
@@ -69,10 +69,16 @@ test-go: ## Run Go tests
 
 test: test-go test-prom ## run all tests
 
-test-prom: ## run prometheus tests
-	sed "s/{{ .Release.Namespace }}/dev/g"  ./charts/dps/templates/alerts.yaml |  sed 's/{{.*}}//g' >  tests/prom/alerts-modified.yaml
-	go tool promtool check rules tests/prom/alerts-modified.yaml
-	go tool promtool test rules tests/prom/rules-tests.yaml
+
+test-prometheus-prepare: ## Prepare Prometheus alert files for testing
+	@mkdir -p ./charts/dps/tests
+	@sed "s/{{ .Release.Namespace }}/dev/g" ./charts/dps/templates/alerts.yaml | sed 's/{{.*}}//g' > ./tests/prom/alerts-modified.yaml
+
+test-prometheus-alerts: test-prometheus-prepare ## Check Prometheus alert rules
+	@go tool promtool check rules ./tests/prom/alerts-modified.yaml
+
+test-prometheus-rules: test-prometheus-prepare ## Run Prometheus rules tests
+	@go tool promtool test rules ./tests/prom/rules-tests.yaml
 
 tools-golangci-lint:
 	@mkdir -p $(PATHINSTBIN)

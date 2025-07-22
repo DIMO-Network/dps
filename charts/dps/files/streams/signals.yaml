@@ -30,7 +30,7 @@ pipeline:
             fields_mapping: |
               root.payload = this
     - label: "convert_signals_to_slice"
-      dimo_signal_to_slice:
+      dimo_signal_to_slice: {}
 
 output:
   label: "insert_signal"

@@ -37,14 +37,13 @@ func (s *eventSliceProcessor) Process(_ context.Context, msg *service.Message) (
 	// Extract the message payload as a byte slice.
 	payload, err := msg.AsBytes()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get event message payload: %w", err)
 	}
 
 	var event []vss.Event
 	err = json.Unmarshal(payload, &event)
 	if err != nil {
-		fmt.Println(err)
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal event: %w", err)
 	}
 	msgs := make([]*service.Message, 0, len(event))
 	for _, e := range event {

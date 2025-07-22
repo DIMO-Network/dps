@@ -19,7 +19,7 @@ input:
 pipeline:
   processors:
     - label: "convert_events_to_slice"
-      dimo_event_to_slice:
+      dimo_event_to_slice: {}
 
 output:
   label: "insert_event"
