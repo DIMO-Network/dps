@@ -1,0 +1,55 @@
+input:
+  label: kafka_input
+  kafka_franz:
+    seed_brokers:
+      - ${KAFKA_BOOTSTRAP_SERVERS:localhost}:${KAFKA_BOOTSTRAP_PORT:9092}
+    topics:
+      - '${DEVICE_EVENTS_TOPIC:topic.device.events}'
+    consumer_group: "zone.dimo.dps.events"
+    client_id: ${CONTAINER_NAME:localhost}-dps-events
+    rack_id: ${NODE_NAME:localhost}
+    fetch_max_bytes: 100MiB
+    fetch_max_wait: 50ms
+    fetch_min_bytes: 1B
+    fetch_max_partition_bytes: 10MiB
+    commit_period: 2s
+    checkpoint_limit: 1000000 # double the batch size for insertion
+    start_offset: "latest"
+
+pipeline:
+  processors:
+    - label: "convert_events_to_slice"
+      dimo_event_to_slice: {}
+
+output:
+  label: "insert_event"
+  fallback:
+    - label: "insert_event_clickhouse"
+      sql_insert:
+        driver: clickhouse
+        dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_DIMO_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&max_execution_time=600
+        table: event
+        columns: []
+        args_mapping: root = this
+        batching:
+          count: 500000
+          byte_size: 0
+          period: "2s"
+          check: ""
+
+    - label: "insert_event_clickhouse_failure"
+      switch:
+        cases:
+          # If the error contains "bad connection", reject the message so it will be retried
+          - check: 'metadata("fallback_error").or("").contains("bad connection")'
+            output:
+              reject: metadata("fallback_error")
+              processors:
+                - resource: "handle_db_connection_error"
+          - check: ''
+            output:
+              drop: {}
+              processors:
+                -  mutation: |
+                    meta dimo_component = "insert_event_clickhouse"
+                - resource: "handle_db_error"

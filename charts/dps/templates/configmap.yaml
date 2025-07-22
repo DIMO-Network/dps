@@ -7,3 +7,5 @@ metadata:
 {{ include "dps.labels" . | indent 4 }}
 data:
 {{ tpl (.Files.Glob "files/*").AsConfig $ | indent 2 }}
+{{ tpl (.Files.Glob ("files/streams/*")).AsConfig $ | indent 2 }}
+

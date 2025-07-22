@@ -1,0 +1,89 @@
+name: Build
+on:
+  pull_request:
+    branches: ["**"]
+  push:
+    branches:
+      - main
+
+jobs:
+  install-tools:
+    if: "!contains(github.event.head_commit.message, 'Merge pull request')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - name: Install all tools
+        run: make tools
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tools
+          path: bin/
+
+  go-tests:
+    needs: install-tools
+    if: "!contains(github.event.head_commit.message, 'Merge pull request')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - uses: actions/download-artifact@v4
+        with:
+          name: tools
+          path: bin/
+      - name: Set executable
+        run: chmod +x bin/*
+      - name: Run Go tests
+        run: make test-go
+
+  prometheus-alerts:
+    needs: install-tools
+    if: "!contains(github.event.head_commit.message, 'Merge pull request')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tools
+          path: bin/
+      - name: Set executable
+        run: chmod +x bin/*
+      - name: Run Prometheus alert tests
+        run: make test-prometheus-alerts
+
+  prometheus-rules:
+    needs: install-tools
+    if: "!contains(github.event.head_commit.message, 'Merge pull request')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: tools
+          path: bin/
+      - name: Set executable
+        run: chmod +x bin/*
+      - name: Run Prometheus rules tests
+        run: make test-prometheus-rules
+  lint:
+    needs: install-tools
+    if: "!contains(github.event.head_commit.message, 'Merge pull request')"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+      - uses: actions/download-artifact@v4
+        with:
+          name: tools
+          path: bin/
+      - name: Set executable
+        run: chmod +x bin/*
+
+      - name: Run lint
+        run: make lint

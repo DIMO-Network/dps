@@ -22,6 +22,7 @@ import (
 
 	// Add our custom plugin packages here.
 	_ "github.com/DIMO-Network/dps/internal/processors/dbmigration"
+	_ "github.com/DIMO-Network/dps/internal/processors/eventstoslice"
 	_ "github.com/DIMO-Network/dps/internal/processors/signalstoslice"
 	_ "github.com/DIMO-Network/dps/internal/processors/splitvalues"
 )

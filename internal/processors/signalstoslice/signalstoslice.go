@@ -1,9 +1,10 @@
-package checksignature
+package signalstoslice
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/DIMO-Network/model-garage/pkg/vss"
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
@@ -18,7 +19,7 @@ func init() {
 	constructor := func(_ *service.ParsedConfig, mgr *service.Resources) (service.Processor, error) {
 		return newSliceProcessor(mgr.Logger()), nil
 	}
-	err := service.RegisterProcessor("signal_to_slice", configSpec, constructor)
+	err := service.RegisterProcessor("dimo_signal_to_slice", configSpec, constructor)
 	if err != nil {
 		panic(err)
 	}
@@ -36,14 +37,13 @@ func (s *sliceProcessor) Process(_ context.Context, msg *service.Message) (servi
 	// Extract the message payload as a byte slice.
 	payload, err := msg.AsBytes()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get signal message payload: %w", err)
 	}
 
 	var signal vss.Signal
 	err = json.Unmarshal(payload, &signal)
 	if err != nil {
-		fmt.Println(err)
-		return nil, err
+		return nil, fmt.Errorf("failed to unmarshal signal: %w", err)
 	}
 
 	sig := vss.SignalToSlice(signal)
