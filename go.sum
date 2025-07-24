@@ -671,8 +671,8 @@ github.com/DIMO-Network/clickhouse-infra v0.0.4 h1:Mff+m2hGC5vrI1kdD3oUKt7bAbwM2
 github.com/DIMO-Network/clickhouse-infra v0.0.4/go.mod h1:TBW6gZPV/9Z364UGbvVSYShowhKZKwlS+raADwMgiDA=
 github.com/DIMO-Network/cloudevent v0.1.2 h1:6T62P5EKj0IAtN4Z8GQ1tRucmoco29jzyzKAzSrW0cY=
 github.com/DIMO-Network/cloudevent v0.1.2/go.mod h1:HM9vpx4EmJv3Dh8GIXmNhmvHFLGZHpmlv1LXo98oM5w=
-github.com/DIMO-Network/model-garage v0.6.5 h1:De+RIyIMVM4b8yvtU6RNiON2vsZHsbLB6yIwu0Lu8Ww=
-github.com/DIMO-Network/model-garage v0.6.5/go.mod h1:89G/TNoTM/MGMof9PX/wdF1KIbthib/Wb1LB8BOJBKY=
+github.com/DIMO-Network/model-garage v0.6.7 h1:tcygIsxM6fOVCXnuTsiLjjw2iyjb3g095Z0d97uR1eU=
+github.com/DIMO-Network/model-garage v0.6.7/go.mod h1:89G/TNoTM/MGMof9PX/wdF1KIbthib/Wb1LB8BOJBKY=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
 github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.5.2 h1:DBjmt6/otSdULyJdVg2BlG0qGZO5tKL4VzOs0jpvw5Q=
 github.com/GoogleCloudPlatform/grpc-gcp-go/grpcgcp v1.5.2/go.mod h1:dppbR7CwXD4pgtV9t3wD1812RaLDcBjtblcDF5f1vI0=
