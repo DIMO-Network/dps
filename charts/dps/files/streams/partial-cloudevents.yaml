@@ -7,13 +7,15 @@ input:
       - '${DEVICE_PARTIAL_CE_TOPIC:topic.device.partialcloudevents}'
     consumer_group: "zone.dimo.dps.partialcloudevents"
     client_id: ${CONTAINER_NAME:localhost}-dps-partial-ce
+    rack_id: ${NODE_NAME:localhost}
     fetch_max_bytes: 100MiB
     fetch_max_wait: 50ms
     fetch_min_bytes: 1B
     fetch_max_partition_bytes: 10MiB
-    rack_id: ${NODE_NAME:localhost}
     commit_period: 2s
-    checkpoint_limit: 500000
+    checkpoint_limit: 1000000 # double the batch size for insertion
+    start_offset: "latest"
+
 
 pipeline:
   processors:
@@ -27,10 +29,8 @@ pipeline:
 
 output:
   label: "insert_partial_cloudevent"
-  drop_on:
-    error: true
-    output:
-      broker:
+  fallback:
+    - broker:
         pattern: fan_out_sequential_fail_fast
         outputs:
           - fallback:
@@ -51,6 +51,7 @@ output:
               # reject instead of drop to avoid attempting CH index insert with no backing obj
               - label: 'insert_partial_cloudevent_s3_failure'
                 reject: '${!metadata("fallback_error").or("failed to store converted cloudevent")}'
+                # processor is happening first, so we can use it to set the meta
                 processors:
                   -  mutation: |
                        meta dimo_component = "insert_partial_cloudevent_s3"
@@ -67,7 +68,7 @@ output:
                   batching:
                     count: 500000
                     byte_size: 0
-                    period: "1s"
+                    period: "2s"
                     check: ""
                 processors:
                   - label: "split_values_partial"
@@ -78,7 +79,6 @@ output:
                       - resource: "handle_db_error"
                       - mapping: root = deleted()
 
-              # Drop the message, log, record metrics and send 500 response
               - label: 'insert_partial_cloudevent_clickhouse_failure'
                 switch:
                   cases:
@@ -95,3 +95,4 @@ output:
                           -  mutation: |
                               meta dimo_component = "insert_signal_clickhouse"
                           - resource: "handle_db_error"
+    - drop: {}
