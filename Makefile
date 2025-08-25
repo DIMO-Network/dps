@@ -67,7 +67,7 @@ format:
 test-go: ## Run Go tests
 	@go test ./...
 
-test: test-go test-prom ## run all tests
+test: test-go test-prometheus-rules test-prometheus-alerts ## run all tests
 
 
 test-prometheus-prepare: ## Prepare Prometheus alert files for testing
