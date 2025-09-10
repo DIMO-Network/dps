@@ -4,12 +4,12 @@ go 1.24.2
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.40.1
-	github.com/DIMO-Network/clickhouse-infra v0.0.4
-	github.com/DIMO-Network/cloudevent v0.1.2
-	github.com/DIMO-Network/model-garage v0.7.2
+	github.com/DIMO-Network/clickhouse-infra v0.0.5
+	github.com/DIMO-Network/cloudevent v0.1.4
+	github.com/DIMO-Network/model-garage v0.7.3-0.20250910161018-bcb24d4353eb
 	github.com/redpanda-data/benthos/v4 v4.55.0
 	github.com/redpanda-data/connect/v4 v4.62.0
-	github.com/stretchr/testify v1.10.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
@@ -109,7 +109,7 @@ require (
 	github.com/digitalocean/godo v1.132.0 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/docker v28.3.3+incompatible // indirect
-	github.com/docker/go-connections v0.5.0 // indirect
+	github.com/docker/go-connections v0.6.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.8.0 // indirect
@@ -120,7 +120,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.32.4 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
-	github.com/ethereum/go-ethereum v1.16.2 // indirect
+	github.com/ethereum/go-ethereum v1.16.3 // indirect
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
@@ -277,7 +277,7 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/spiffe/go-spiffe/v2 v2.5.0 // indirect
 	github.com/tidwall/gjson v1.18.0 // indirect
-	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/match v1.2.0 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/sjson v1.2.5 // indirect
 	github.com/tilinna/z85 v1.0.0 // indirect
@@ -325,17 +325,17 @@ require (
 	go.uber.org/goleak v1.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/crypto v0.40.0 // indirect
+	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/exp v0.0.0-20250531010427-b6e5de432a8b // indirect
 	golang.org/x/mod v0.27.0 // indirect
-	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/net v0.43.0 // indirect
 	golang.org/x/oauth2 v0.30.0 // indirect
-	golang.org/x/sync v0.16.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
-	golang.org/x/term v0.33.0 // indirect
-	golang.org/x/text v0.28.0 // indirect
+	golang.org/x/sync v0.17.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/term v0.35.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
 	golang.org/x/time v0.11.0 // indirect
-	golang.org/x/tools v0.35.0 // indirect
+	golang.org/x/tools v0.36.0 // indirect
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/api v0.233.0 // indirect
 	google.golang.org/genproto v0.0.0-20250505200425-f936aa4a68b2 // indirect
