@@ -3,6 +3,7 @@ package dbmigration
 import (
 	"context"
 	"fmt"
+	"io/fs"
 	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
@@ -35,12 +36,12 @@ func Register(procName string) {
 }
 
 func ctor(procName string) func(*service.ParsedConfig, *service.Resources) (service.BatchProcessor, error) {
-	var registerFunc []func()
+	var baseFs fs.FS
 	switch procName {
 	case indexMigrationProcName:
-		registerFunc = indexmigrations.RegisterFuncs()
+		baseFs = indexmigrations.BaseFS
 	case signalMigrationProcName:
-		registerFunc = sigmigrations.RegisterFuncs()
+		baseFs = sigmigrations.BaseFS
 	}
 	return func(cfg *service.ParsedConfig, mgr *service.Resources) (service.BatchProcessor, error) {
 		migration, err := cfg.FieldString("dsn")
@@ -49,7 +50,7 @@ func ctor(procName string) func(*service.ParsedConfig, *service.Resources) (serv
 		}
 		mgr.Logger().Infof("Running migration for %s", procName)
 		start := time.Now()
-		if err := runMigration(migration, registerFunc); err != nil {
+		if err := runMigration(migration, baseFs); err != nil {
 			return nil, fmt.Errorf("failed %s: %w", procName, err)
 		}
 		mgr.Logger().Infof("Migration for %s completed after %s", procName, time.Since(start))
@@ -58,13 +59,13 @@ func ctor(procName string) func(*service.ParsedConfig, *service.Resources) (serv
 	}
 }
 
-func runMigration(dsn string, registeredFuncs []func()) error {
+func runMigration(dsn string, baseFs fs.FS) error {
 	dbOptions, err := clickhouse.ParseDSN(dsn)
 	if err != nil {
 		return fmt.Errorf("failed to parse dsn: %w", err)
 	}
 	db := clickhouse.OpenDB(dbOptions)
-	err = migrate.RunGoose(context.Background(), []string{"up", "-v"}, registeredFuncs, db)
+	err = migrate.RunGoose(context.Background(), []string{"up", "-v"}, baseFs, db)
 	if err != nil {
 		_ = db.Close()
 		return fmt.Errorf("failed to run migration: %w", err)
