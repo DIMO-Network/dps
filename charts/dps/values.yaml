@@ -4,15 +4,15 @@ image:
   pullPolicy: IfNotPresent
   tag: 4b3e271
   command:
-    - /dps
+  - /dps
   args:
-    - '-w'
-    - '-r'
-    - /config/resources.yaml
-    - '-c'
-    - /config/config.yaml
-    - streams
-    - /streams/
+  - -w
+  - -r
+  - /config/resources.yaml
+  - -c
+  - /config/config.yaml
+  - streams
+  - /streams/
 imagePullSecrets: []
 nameOverride: ''
 fullnameOverride: ''
@@ -29,7 +29,7 @@ securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-      - all
+    - all
 env:
   KAFKA_BOOTSTRAP_SERVERS: kafka-dev-dimo-kafka-kafka-brokers
   DEVICE_SIGNALS_TOPIC: topic.device.signals
@@ -57,12 +57,12 @@ service:
       targetPort: http
       protocol: TCP
 ports:
-  - name: mon-http
-    containerPort: 8888
-    protocol: TCP
-  - name: http
-    containerPort: 8080
-    protocol: TCP
+- name: mon-http
+  containerPort: 8888
+  protocol: TCP
+- name: http
+  containerPort: 8080
+  protocol: TCP
 livenessProbe:
   httpGet:
     path: /ping
@@ -86,10 +86,10 @@ ingress:
 resources:
   limits:
     cpu: 250m
-    memory: 256Mi
+    memory: 384Mi
   requests:
-    cpu: 50m
-    memory: 128Mi
+    cpu: 5m
+    memory: 32Mi
 autoscaling:
   enabled: false
   minReplicas: 1
@@ -108,27 +108,27 @@ serviceMonitor:
 kafka:
   clusterName: kafka-dev-dimo-kafka
   topics:
-    - name: topic.device.signals
-      config:
-        segment.ms: '3600000'
-        compression.type: producer
-        cleanup.policy: delete
-        retention.ms: '7200000'
-    - name: topic.device.events
-      config:
-        segment.ms: '3600000'
-        compression.type: producer
-        cleanup.policy: delete
-        retention.ms: '7200000'
-    - name: topic.device.validcloudevents
-      config:
-        segment.ms: '3600000'
-        compression.type: producer
-        cleanup.policy: delete
-        retention.ms: '7200000'
-    - name: topic.device.partialcloudevents
-      config:
-        segment.ms: '3600000'
-        compression.type: producer
-        cleanup.policy: delete
-        retention.ms: '7200000'
+  - name: topic.device.signals
+    config:
+      segment.ms: '3600000'
+      compression.type: producer
+      cleanup.policy: delete
+      retention.ms: '7200000'
+  - name: topic.device.events
+    config:
+      segment.ms: '3600000'
+      compression.type: producer
+      cleanup.policy: delete
+      retention.ms: '7200000'
+  - name: topic.device.validcloudevents
+    config:
+      segment.ms: '3600000'
+      compression.type: producer
+      cleanup.policy: delete
+      retention.ms: '7200000'
+  - name: topic.device.partialcloudevents
+    config:
+      segment.ms: '3600000'
+      compression.type: producer
+      cleanup.policy: delete
+      retention.ms: '7200000'
