@@ -47,6 +47,9 @@ output:
                   credentials:
                     id: ${S3_AWS_ACCESS_KEY_ID}
                     secret: ${S3_AWS_SECRET_ACCESS_KEY}
+                  batching:
+                    count: 10000
+                    period: "5s"
               # reject the message, log, record metrics
               # reject instead of drop to avoid attempting CH index insert with no backing obj
               - label: 'insert_partial_cloudevent_s3_failure'

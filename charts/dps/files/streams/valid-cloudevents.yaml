@@ -12,7 +12,7 @@ input:
     fetch_max_wait: 50ms
     fetch_min_bytes: 1B
     fetch_max_partition_bytes: 10MiB
-    commit_period: 2s
+    commit_period: 5s
     checkpoint_limit: 1000000 # double the batch size for insertion
     start_offset: "latest"
 
@@ -51,6 +51,9 @@ output:
                   credentials:
                     id: ${S3_AWS_ACCESS_KEY_ID}
                     secret: ${S3_AWS_SECRET_ACCESS_KEY}
+                  batching:
+                    count: 10000
+                    period: "5s"
               # reject the message, log, record metrics
               # reject instead of drop to avoid attempting CH index insert with no backing obj
               - label: 'insert_valid_cloudevent_s3_failure'
