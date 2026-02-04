@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -38,7 +38,7 @@ jobs:
           tags: dimozone/dps:${{steps.tag.outputs.tag}}
 
       - name: Update Image Version in the related HelmChart values.yaml
-        uses: fjogeleit/yaml-update-action@v0.15.0
+        uses: fjogeleit/yaml-update-action@v0.16.1
         with:
           valueFile: "charts/dps/values-prod.yaml"
           propertyPath: "image.tag"
