@@ -1,0 +1,28 @@
+input:
+  label: kafka_iceberg_commit_input
+  kafka_franz:
+    seed_brokers:
+      - ${KAFKA_BOOTSTRAP_SERVERS:localhost}:${KAFKA_BOOTSTRAP_PORT:9092}
+    topics:
+      - '${ICEBERG_COMMIT_TOPIC:topic.iceberg.commits}'
+    consumer_group: "zone.dimo.dps.iceberg-committer"
+    client_id: ${CONTAINER_NAME:localhost}-dps-iceberg-committer
+    rack_id: ${NODE_NAME:localhost}
+    fetch_max_bytes: 10MiB
+    fetch_max_wait: 100ms
+    fetch_min_bytes: 1B
+    commit_period: 10s
+    # Single consumer -- only one instance should commit to the Iceberg catalog.
+    # Kafka consumer group ensures this even if multiple DPS replicas are running.
+    start_offset: "earliest"
+
+pipeline:
+  processors:
+    - label: "iceberg_batch_commit"
+      dimo_iceberg_commit:
+        catalog_uri: ${ICEBERG_CATALOG_URI:http://lakekeeper:8181}
+        warehouse: ${ICEBERG_WAREHOUSE:s3://dimo-iceberg-dev/warehouse/}
+
+output:
+  label: "iceberg_commit_ack"
+  drop: {}

@@ -3,10 +3,16 @@ kafka:
   clusterName: kafka-prod-dimo-kafka
 env:
   KAFKA_BOOTSTRAP_SERVERS: kafka-prod-dimo-kafka-kafka-bootstrap
+  # Legacy S3 buckets (kept during migration, eventually removed)
   S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-prod
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-prod
   ENVIRONMENT: prod
   LOG_LEVEL: INFO
+  # Iceberg / Object Storage (cloud-agnostic)
+  ICEBERG_CATALOG_URI: http://lakekeeper:8181
+  ICEBERG_WAREHOUSE: s3://dimo-iceberg-prod/warehouse/
+  ICEBERG_COMMIT_TOPIC: topic.iceberg.commits
+  OBJECT_STORAGE_ENDPOINT: https://s3.us-east-2.amazonaws.com
 ingress:
   enabled: false
 resources:
