@@ -33,10 +33,10 @@ func TestProcess_BuildsIcebergAppendBody(t *testing.T) {
 			Action     string `json:"action"`
 			SnapshotID int64  `json:"snapshot-id"`
 			DataFiles  []struct {
-				FilePath   string `json:"file-path"`
-				FileFormat string `json:"file-format"`
-				RecordCount int64 `json:"record-count"`
-				FileSize   int64 `json:"file-size-in-bytes"`
+				FilePath    string `json:"file-path"`
+				FileFormat  string `json:"file-format"`
+				RecordCount int64  `json:"record-count"`
+				FileSize    int64  `json:"file-size-in-bytes"`
 			} `json:"data-files"`
 		} `json:"updates"`
 	}

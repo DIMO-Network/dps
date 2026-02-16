@@ -1,8 +1,11 @@
 package encoders
 
 import (
+	"encoding/json"
 	"testing"
 
+	"github.com/DIMO-Network/cloudevent"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -39,4 +42,22 @@ func TestEncodeToParquet_EmptyFails(t *testing.T) {
 	require.Error(t, err)
 	_, err = EncodeToParquet([][]byte{})
 	require.Error(t, err)
+}
+
+// TestRawEvent_DataBase64 ensures RawEvent unmarshals data_base64 and populates Data.
+// Encoder uses RawEvent; this confirms base64-encoded event data is accepted in the pipeline.
+func TestRawEvent_DataBase64(t *testing.T) {
+	payload := []byte(`{
+		"id": "ev-1",
+		"source": "test",
+		"producer": "p",
+		"specversion": "1.0",
+		"subject": "sub",
+		"time": "2025-01-01T00:00:00Z",
+		"type": "dimo.status",
+		"data_base64": "YmluYXJ5AHBheWxvYWQ="
+	}`)
+	var rawEvent cloudevent.RawEvent
+	require.NoError(t, json.Unmarshal(payload, &rawEvent))
+	assert.Equal(t, []byte("binary\x00payload"), []byte(rawEvent.Data))
 }

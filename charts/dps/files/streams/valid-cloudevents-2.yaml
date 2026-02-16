@@ -20,7 +20,7 @@ input:
       period: "5s"
       processors:
         - dimo_cloudevent_to_parquet:
-            warehouse: ${ICEBERG_WAREHOUSE:s3://dimo-iceberg-dev/warehouse/}
+            warehouse: ${ICEBERG_WAREHOUSE:s3://dimo-storage-dev/warehouse/}
             prefix: cloudevent/valid/
 
 pipeline:

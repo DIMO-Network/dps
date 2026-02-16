@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/DIMO-Network/dps/internal/cloudeventparquet/encoders"
+	"github.com/DIMO-Network/dps/internal/encoders"
 	"github.com/google/uuid"
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
