@@ -11,7 +11,6 @@ env:
   # Iceberg / Object Storage (cloud-agnostic)
   ICEBERG_CATALOG_URI: http://lakekeeper:8181
   ICEBERG_WAREHOUSE: s3://dimo-iceberg-prod/warehouse/
-  ICEBERG_COMMIT_TOPIC: topic.iceberg.commits
   OBJECT_STORAGE_ENDPOINT: https://s3.us-east-2.amazonaws.com
 ingress:
   enabled: false

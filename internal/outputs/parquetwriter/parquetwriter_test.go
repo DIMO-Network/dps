@@ -1,8 +1,10 @@
 package parquetwriter
 
 import (
+	"encoding/json"
 	"testing"
 
+	"github.com/DIMO-Network/cloudevent"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -46,4 +48,24 @@ func TestParquetSchemaFields(t *testing.T) {
 	for i, name := range expectedFields {
 		assert.Equal(t, name, parquetSchema.Field(i).Name, "field %d", i)
 	}
+}
+
+// TestParseMessages_DataBase64 ensures that when a CloudEvent is received with
+// only data_base64 (no "data" field), RawEvent unmarshals and Data is the decoded payload.
+// This confirms the pipeline accepts base64-encoded event data.
+func TestParseMessages_DataBase64(t *testing.T) {
+	// CE JSON with only data_base64. base64("binary\x00payload") = YmluYXJ5AHBheWxvYWQ=
+	payload := []byte(`{
+		"id": "ev-1",
+		"source": "test",
+		"producer": "p",
+		"specversion": "1.0",
+		"subject": "sub",
+		"time": "2025-01-01T00:00:00Z",
+		"type": "dimo.status",
+		"data_base64": "YmluYXJ5AHBheWxvYWQ="
+	}`)
+	var rawEvent cloudevent.RawEvent
+	require.NoError(t, json.Unmarshal(payload, &rawEvent))
+	assert.Equal(t, []byte("binary\x00payload"), []byte(rawEvent.Data), "Data should be decoded payload from data_base64")
 }

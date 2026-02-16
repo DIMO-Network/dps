@@ -13,9 +13,15 @@ input:
     fetch_min_bytes: 1B
     fetch_max_partition_bytes: 10MiB
     commit_period: 2s
-    checkpoint_limit: 1000000 # double the batch size for insertion
+    checkpoint_limit: 1000000
     start_offset: "latest"
-
+    batching:
+      count: 10000
+      period: "5s"
+      processors:
+        - dimo_cloudevent_to_parquet:
+            warehouse: ${ICEBERG_WAREHOUSE:s3://dimo-iceberg-dev/warehouse/}
+            prefix: cloudevent/partial/
 
 pipeline:
   processors:
@@ -33,73 +39,74 @@ output:
     - broker:
         pattern: fan_out_sequential_fail_fast
         outputs:
-          # 1. Write payload to Parquet on object storage.
-          #    Sets dimo_parquet_path/size/count on the first message for the Iceberg commit step.
           - fallback:
               - label: "write_partial_cloudevent_parquet_2"
-                dimo_parquet_writer:
-                  warehouse: ${ICEBERG_WAREHOUSE:s3://dimo-iceberg-dev/warehouse/}
-                  prefix: cloudevent/partial/
-                  storage_endpoint: ${OBJECT_STORAGE_ENDPOINT:https://s3.us-east-2.amazonaws.com}
-                  credentials:
-                    access_key: ${OBJECT_STORAGE_ACCESS_KEY:${S3_AWS_ACCESS_KEY_ID}}
-                    secret_key: ${OBJECT_STORAGE_SECRET_KEY:${S3_AWS_SECRET_ACCESS_KEY}}
-                  batching:
-                    count: 10000
-                    period: "5s"
+                switch:
+                  cases:
+                    - check: 'metadata("dimo_s3_upload_key").or("") != ""'
+                      output:
+                        aws_s3:
+                          bucket: ${!metadata("dimo_s3_bucket")}
+                          path: ${!metadata("dimo_s3_upload_key")}
+                          content_type: application/octet-stream
+                          endpoint: ${OBJECT_STORAGE_ENDPOINT:https://s3.us-east-2.amazonaws.com}
+                          region: ${OBJECT_STORAGE_REGION:us-east-2}
+                          credentials:
+                            id: ${OBJECT_STORAGE_ACCESS_KEY:${S3_AWS_ACCESS_KEY_ID}}
+                            secret: ${OBJECT_STORAGE_SECRET_KEY:${S3_AWS_SECRET_ACCESS_KEY}}
               - label: 'write_partial_cloudevent_parquet_failure_2'
                 reject: '${!metadata("fallback_error").or("failed to write partial cloudevent parquet")}'
                 processors:
-                  -  mutation: |
-                       meta dimo_component = "write_partial_cloudevent_parquet_2"
+                  - mutation: |
+                      meta dimo_component = "write_partial_cloudevent_parquet_2"
                   - resource: "handle_db_error"
 
-          # 2. Publish Iceberg commit message for the Parquet file.
-          #    Only the first message per batch carries dimo_parquet_path; the rest are dropped.
           - fallback:
               - label: "publish_iceberg_commit_partial_2"
-                kafka_franz:
-                  seed_brokers:
-                    - '${KAFKA_BOOTSTRAP_SERVERS:localhost}:${KAFKA_BOOTSTRAP_PORT:9092}'
-                  topic: '${ICEBERG_COMMIT_TOPIC:topic.iceberg.commits}'
-                processors:
-                  - mapping: |
-                      let ppath = metadata("dimo_parquet_path").or("")
-                      if $ppath == "" { root = deleted() }
-                      root.file_path = $ppath
-                      root.file_size = metadata("dimo_parquet_size").or("0").number()
-                      root.record_count = metadata("dimo_parquet_count").or("0").number()
-                      root.namespace = "cloudevent"
-                      root.table_name = "partial"
+                switch:
+                  cases:
+                    - check: 'metadata("dimo_parquet_path").or("") != "" && metadata("dimo_s3_upload_key").or("") == ""'
+                      output:
+                        http_client:
+                          url: '${ICEBERG_CATALOG_URI:http://lakekeeper:8181}/v1/${ICEBERG_WAREHOUSE}/namespaces/cloudevent/tables/partial'
+                          verb: POST
+                          headers:
+                            Content-Type: application/json
+                          timeout: 30s
+                          processors:
+                            - dimo_iceberg_commit: {}
               - label: 'publish_iceberg_commit_failure_partial_2'
                 reject: '${!metadata("fallback_error").or("failed to publish iceberg commit")}'
                 processors:
-                  -  mutation: |
-                       meta dimo_component = "publish_iceberg_commit_partial_2"
+                  - mutation: |
+                      meta dimo_component = "publish_iceberg_commit_partial_2"
                   - resource: "handle_db_error"
 
-          # 3. Insert index into ClickHouse cloud_event_2 table.
           - fallback:
               - label: "insert_partial_cloudevent_clickhouse_2"
-                sql_insert:
-                  driver: clickhouse
-                  dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s&max_execution_time=300
-                  table: cloud_event_2
-                  columns: []
-                  args_mapping: root = this
-                  batching:
-                    count: 500000
-                    byte_size: 0
-                    period: "2s"
-                    check: ""
-                processors:
-                  - label: "split_values_partial_2"
-                    dimo_split_values: {}
-                  - catch:
-                      -  mutation: |
-                           meta dimo_component = "split_values_partial_2"
-                      - resource: "handle_db_error"
-                      - mapping: root = deleted()
+                switch:
+                  cases:
+                    - check: 'metadata("dimo_s3_upload_key").or("") == ""'
+                      output:
+                        sql_insert:
+                          driver: clickhouse
+                          dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s&max_execution_time=300
+                          table: cloud_event_2
+                          columns: []
+                          args_mapping: root = this
+                          batching:
+                            count: 500000
+                            byte_size: 0
+                            period: "2s"
+                            check: ""
+                          processors:
+                            - label: "split_values_partial_2"
+                              dimo_split_values: {}
+                            - catch:
+                                - mutation: |
+                                    meta dimo_component = "split_values_partial_2"
+                                - resource: "handle_db_error"
+                                - mapping: root = deleted()
 
               - label: 'insert_partial_cloudevent_clickhouse_failure_2'
                 switch:
@@ -113,7 +120,7 @@ output:
                       output:
                         drop: {}
                         processors:
-                          -  mutation: |
+                          - mutation: |
                               meta dimo_component = "insert_partial_cloudevent_clickhouse_2"
                           - resource: "handle_db_error"
     - drop: {}

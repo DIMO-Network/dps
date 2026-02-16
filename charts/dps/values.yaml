@@ -48,7 +48,6 @@ env:
   # Iceberg / Object Storage (cloud-agnostic)
   ICEBERG_CATALOG_URI: http://lakekeeper:8181
   ICEBERG_WAREHOUSE: s3://dimo-iceberg-dev/warehouse/
-  ICEBERG_COMMIT_TOPIC: topic.iceberg.commits
   OBJECT_STORAGE_ENDPOINT: https://s3.us-east-2.amazonaws.com
   LOG_LEVEL: DEBUG
 service:
@@ -138,9 +137,3 @@ kafka:
         compression.type: producer
         cleanup.policy: delete
         retention.ms: '7200000'
-    - name: topic.iceberg.commits
-      config:
-        segment.ms: '3600000'
-        compression.type: producer
-        cleanup.policy: delete
-        retention.ms: '86400000'

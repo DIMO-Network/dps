@@ -1,130 +1,88 @@
-// Package icebergcommit provides a Benthos batch processor that commits
-// Parquet file paths to an Iceberg table via the Iceberg REST catalog API.
+// Package icebergcommit provides a Benthos processor that builds the Iceberg
+// REST catalog update-table (append) request body from message metadata.
+// It does not perform HTTP; a downstream output (e.g. http_client) POSTs the body.
 //
-// This processor runs as a single-instance consumer on the iceberg commit topic.
-// It accumulates file paths and does batched Iceberg append commits via direct
-// REST API calls to Lakekeeper (no iceberg-go dependency).
+// Snapshot ID is generated in this package (UUID-based int64); Bloblang cannot
+// produce that value.
 package icebergcommit
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"time"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
 
-// CommitMessage is the JSON structure published to the commit topic by the parquet writer.
-type CommitMessage struct {
-	// FilePath is the object storage key of the Parquet file.
-	FilePath string `json:"file_path"`
-	// FileSize is the size of the Parquet file in bytes.
-	FileSize int64 `json:"file_size"`
-	// RecordCount is the number of records in the Parquet file.
-	RecordCount int64 `json:"record_count"`
-	// Namespace is the Iceberg namespace (e.g. "cloudevent").
-	Namespace string `json:"namespace"`
-	// TableName is the Iceberg table name (e.g. "valid" or "partial").
-	TableName string `json:"table_name"`
-}
-
 var configSpec = service.NewConfigSpec().
-	Summary("Commits batched Parquet file paths to an Iceberg table via REST catalog.").
-	Field(service.NewStringField("catalog_uri").Description("URI of the Iceberg REST catalog (e.g. http://lakekeeper:8181).")).
-	Field(service.NewStringField("warehouse").Description("Iceberg warehouse identifier."))
+	Summary("Builds Iceberg REST update-table JSON from message metadata (no HTTP).")
 
 func init() {
-	err := service.RegisterBatchProcessor("dimo_iceberg_commit", configSpec, ctor)
+	err := service.RegisterProcessor("dimo_iceberg_commit", configSpec, ctor)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func ctor(conf *service.ParsedConfig, mgr *service.Resources) (service.BatchProcessor, error) {
-	catalogURI, err := conf.FieldString("catalog_uri")
+func ctor(_ *service.ParsedConfig, _ *service.Resources) (service.Processor, error) {
+	return &requestBuilder{}, nil
+}
+
+type requestBuilder struct{}
+
+// Close fulfills the service.Processor interface.
+func (r *requestBuilder) Close(context.Context) error { return nil }
+
+// Process reads dimo_parquet_* metadata, builds the Iceberg append request JSON,
+// and sets the message body to that JSON (one data-file per message).
+func (r *requestBuilder) Process(ctx context.Context, msg *service.Message) (service.MessageBatch, error) {
+	path, ok := msg.MetaGet("dimo_parquet_path")
+	if !ok || path == "" {
+		return nil, fmt.Errorf("metadata dimo_parquet_path missing or empty")
+	}
+
+	sizeMeta, _ := msg.MetaGet("dimo_parquet_size")
+	size := int64(0)
+	if sizeMeta != "" {
+		size, _ = strconv.ParseInt(sizeMeta, 10, 64)
+	}
+
+	countMeta, _ := msg.MetaGet("dimo_parquet_count")
+	count := int64(0)
+	if countMeta != "" {
+		count, _ = strconv.ParseInt(countMeta, 10, 64)
+	}
+
+	body, err := buildCommitBody([]commitEntry{
+		{FilePath: path, FileSize: size, RecordCount: count},
+	})
 	if err != nil {
-		return nil, fmt.Errorf("field catalog_uri: %w", err)
-	}
-	warehouse, err := conf.FieldString("warehouse")
-	if err != nil {
-		return nil, fmt.Errorf("field warehouse: %w", err)
+		return nil, err
 	}
 
-	return &committer{
-		catalogURI: catalogURI,
-		warehouse:  warehouse,
-		httpClient: &http.Client{Timeout: 30 * time.Second},
-		logger:     mgr.Logger(),
-	}, nil
+	out := msg.Copy()
+	out.SetBytes(body)
+	return service.MessageBatch{out}, nil
 }
 
-type committer struct {
-	catalogURI string
-	warehouse  string
-	httpClient *http.Client
-	logger     *service.Logger
+type commitEntry struct {
+	FilePath    string
+	FileSize    int64
+	RecordCount int64
 }
 
-// Close fulfills the service.BatchProcessor interface.
-func (c *committer) Close(context.Context) error { return nil }
-
-// ProcessBatch receives a batch of commit messages and appends the referenced
-// Parquet files to the appropriate Iceberg table via the REST catalog API.
-func (c *committer) ProcessBatch(ctx context.Context, msgs service.MessageBatch) ([]service.MessageBatch, error) {
-	if len(msgs) == 0 {
-		return []service.MessageBatch{msgs}, nil
-	}
-
-	// Group commit messages by namespace.table.
-	type tableKey struct{ namespace, table string }
-	grouped := make(map[tableKey][]CommitMessage)
-
-	for i, msg := range msgs {
-		payload, err := msg.AsBytes()
-		if err != nil {
-			return nil, fmt.Errorf("message %d: get bytes: %w", i, err)
-		}
-
-		var cm CommitMessage
-		if err := json.Unmarshal(payload, &cm); err != nil {
-			return nil, fmt.Errorf("message %d: unmarshal commit message: %w", i, err)
-		}
-
-		key := tableKey{namespace: cm.Namespace, table: cm.TableName}
-		grouped[key] = append(grouped[key], cm)
-	}
-
-	// Commit each table's files via REST API.
-	for key, commits := range grouped {
-		if err := c.commitFiles(ctx, key.namespace, key.table, commits); err != nil {
-			return nil, fmt.Errorf("commit to %s.%s: %w", key.namespace, key.table, err)
-		}
-		c.logger.Infof("Committed %d Parquet files to %s.%s", len(commits), key.namespace, key.table)
-	}
-
-	return []service.MessageBatch{msgs}, nil
-}
-
-// commitFiles appends Parquet files to an Iceberg table via the REST catalog
-// update-table API endpoint.
-//
+// buildCommitBody returns the Iceberg REST update-table request JSON (append action).
 // See: https://iceberg.apache.org/rest-catalog-spec/#update-a-table
-func (c *committer) commitFiles(ctx context.Context, namespace, tableName string, commits []CommitMessage) error {
-	// Build the append-files update request per the Iceberg REST spec.
-	// The REST API uses the "append" update with data-file entries.
-	dataFiles := make([]map[string]any, 0, len(commits))
-	for _, cm := range commits {
+func buildCommitBody(entries []commitEntry) ([]byte, error) {
+	dataFiles := make([]map[string]any, 0, len(entries))
+	for _, e := range entries {
 		dataFiles = append(dataFiles, map[string]any{
-			"file-path":        cm.FilePath,
-			"file-format":      "PARQUET",
-			"record-count":     cm.RecordCount,
-			"file-size-in-bytes": cm.FileSize,
-			// partition and column-sizes/value-counts can be added later for optimization.
+			"file-path":          e.FilePath,
+			"file-format":        "PARQUET",
+			"record-count":       e.RecordCount,
+			"file-size-in-bytes": e.FileSize,
 		})
 	}
 
@@ -132,44 +90,19 @@ func (c *committer) commitFiles(ctx context.Context, namespace, tableName string
 		"requirements": []map[string]any{},
 		"updates": []map[string]any{
 			{
-				"action": "append",
-				"snapshot-id": newSnapshotID(),
-				"data-files":  dataFiles,
+				"action":       "append",
+				"snapshot-id":  newSnapshotID(),
+				"data-files":   dataFiles,
 			},
 		},
 	}
 
-	bodyJSON, err := json.Marshal(reqBody)
-	if err != nil {
-		return fmt.Errorf("marshal request: %w", err)
-	}
-
-	// POST to /v1/{prefix}/namespaces/{namespace}/tables/{table}
-	url := fmt.Sprintf("%s/v1/%s/namespaces/%s/tables/%s", c.catalogURI, c.warehouse, namespace, tableName)
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(bodyJSON))
-	if err != nil {
-		return fmt.Errorf("create request: %w", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("send request: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		respBody, _ := io.ReadAll(resp.Body)
-		return fmt.Errorf("catalog returned %d: %s", resp.StatusCode, string(respBody))
-	}
-
-	return nil
+	return json.Marshal(reqBody)
 }
 
 // newSnapshotID generates a unique snapshot ID for an Iceberg commit.
 func newSnapshotID() int64 {
 	u := uuid.New()
-	// Use the first 8 bytes as a positive int64.
 	var id int64
 	for i := 0; i < 8; i++ {
 		id = (id << 8) | int64(u[i])
