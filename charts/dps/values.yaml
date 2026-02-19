@@ -41,9 +41,14 @@ env:
   CLICKHOUSE_PORT: 9440
   CLICKHOUSE_DIMO_DATABASE: dimo
   CLICKHOUSE_INDEX_DATABASE: file_index
+  # Legacy S3 buckets (kept during migration, eventually removed)
   S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-dev
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-dev
   S3_AWS_REGION: us-east-2
+  # Iceberg / Object Storage (cloud-agnostic)
+  ICEBERG_CATALOG_URI: http://lakekeeper:8181
+  ICEBERG_WAREHOUSE: s3://dimo-storage-dev/warehouse/
+  OBJECT_STORAGE_ENDPOINT: https://s3.us-east-2.amazonaws.com
   LOG_LEVEL: DEBUG
 service:
   type: ClusterIP
