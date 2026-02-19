@@ -1,0 +1,49 @@
+---
+description: Project rules for DIMO DPS (Data Processing Service)
+globs:
+  - "**/*.go"
+  - "**/*.yaml"
+---
+
+# DPS – DIMO Data Processing Service
+
+## Overview
+Stream-processing pipeline built on **Redpanda Benthos v4** / **Connect v4**.
+Ingests CloudEvents from Redpanda/Kafka, converts to Parquet, and commits to an Iceberg catalog.
+
+## Tech Stack
+- **Language:** Go 1.24+
+- **Framework:** Redpanda Benthos v4 (`github.com/redpanda-data/benthos/v4`)
+- **Key deps:** model-garage, cloudevent, clickhouse-go, apache arrow-go
+- **Deployment:** Helm charts (`charts/dps/`), Docker (`docker/dockerfile`)
+
+## Project Structure
+```
+├── bin/            # build output
+├── charts/dps/     # Helm chart, Benthos stream configs (YAML)
+├── docker/         # Dockerfile
+├── internal/
+│   ├── encoders/       # encoding utilities
+│   ├── processors/     # Benthos processor plugins
+│   │   ├── cloudeventtoparquet/
+│   │   └── icebergcommit/
+│   └── outputs/        # Benthos output plugins
+├── tests/          # Prometheus alert/rule tests
+```
+
+## Build & Test Commands
+| Task | Command |
+|------|---------|
+| Build | `make build` or `go build ./...` |
+| Test | `make test` (Go + Prometheus rules) |
+| Go tests only | `go test ./...` |
+| Lint | `make lint` (golangci-lint + Benthos lint) |
+| Tidy deps | `make dep` or `go mod tidy` |
+
+## Conventions
+- Benthos processors/outputs live under `internal/processors/` and `internal/outputs/`.
+- Stream configs are YAML files in `charts/dps/files/streams/`.
+- Tests use `testify` (`stretchr/testify`).
+- No CGO (`CGO_ENABLED=0`).
+- CloudEvent types come from `github.com/DIMO-Network/cloudevent`.
+- Vehicle signal schemas come from `github.com/DIMO-Network/model-garage`.

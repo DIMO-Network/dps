@@ -5,7 +5,7 @@ go 1.24.2
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.40.1
 	github.com/DIMO-Network/clickhouse-infra v0.0.7
-	github.com/DIMO-Network/cloudevent v0.1.5
+	github.com/DIMO-Network/cloudevent v0.1.6
 	github.com/DIMO-Network/model-garage v0.8.9
 	github.com/apache/arrow-go/v18 v18.5.1
 	github.com/google/uuid v1.6.0
