@@ -12,12 +12,12 @@ input:
     fetch_max_wait: 50ms
     fetch_min_bytes: 1B
     fetch_max_partition_bytes: 10MiB
-    commit_period: 5s
+    commit_period: 7s
     checkpoint_limit: 1000000
     start_offset: "latest"
     batching:
       count: 10000
-      period: "5s"
+      period: "7s"
 
 pipeline:
   processors:

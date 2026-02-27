@@ -28,7 +28,6 @@ func TestProcessBatch_MetadataAndPath(t *testing.T) {
 	parquetMsg := batches[0][0]
 	key, _ := parquetMsg.MetaGet(MetaS3UploadKey)
 	require.NotEmpty(t, key)
-	assert.Contains(t, key, "s/")
 	assert.Regexp(t, `\d{4}/\d{2}/\d{2}/`, key, "path has year/month/day segments")
 	assert.Contains(t, key, "batch-")
 	assert.Contains(t, key, ".parquet")
@@ -36,7 +35,7 @@ func TestProcessBatch_MetadataAndPath(t *testing.T) {
 	assert.Equal(t, key, path)
 }
 
-func TestProcessBatch_GroupBySource(t *testing.T) {
+func TestProcessBatch_OneParquetPerBatch(t *testing.T) {
 	proc := &processor{prefix: "p/"}
 	defer func() { _ = proc.Close(context.Background()) }()
 
@@ -46,42 +45,18 @@ func TestProcessBatch_GroupBySource(t *testing.T) {
 	batches, err := proc.ProcessBatch(context.Background(), service.MessageBatch{msg1, msg2, msg3})
 	require.NoError(t, err)
 	require.Len(t, batches, 1)
-	// 2 groups (src1, src2) -> 2 parquet msgs + 3 originals
-	require.Len(t, batches[0], 5)
-	keys := make([]string, 0, 2)
-	for i := 0; i < 2; i++ {
-		k, _ := batches[0][i].MetaGet(MetaS3UploadKey)
-		keys = append(keys, k)
-	}
-	assert.Contains(t, keys[0], "src1/")
-	assert.Contains(t, keys[1], "src2/")
-	// Originals: all have dimo_cloudevent_index (parquet_path#row_offset)
-	idx1, _ := batches[0][2].MetaGet(MetaCloudeventIndex)
-	idx3, _ := batches[0][4].MetaGet(MetaCloudeventIndex)
-	assert.Contains(t, idx1, "src1/")
-	assert.Contains(t, idx3, "src1/")
-	// Same file: index is path#offset, so prefix (path) should match for same group
-	assert.Equal(t, idx1[:strings.Index(idx1, "#")], idx3[:strings.Index(idx3, "#")])
-}
-
-func TestSanitizePartitionValue(t *testing.T) {
-	tests := []struct {
-		in   string
-		want string
-	}{
-		{"sub", "sub"},
-		{"a/b", "a_b"},
-		{"a\\b", "a_b"},
-		{"", "_"},
-		{"  ", "_"},
-		{" /x/ ", "_x_"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.in, func(t *testing.T) {
-			got := sanitizePartitionValue(tt.in)
-			assert.Equal(t, tt.want, got)
-		})
-	}
+	// 1 parquet + 3 originals
+	require.Len(t, batches[0], 4)
+	parquetMsg := batches[0][0]
+	key, _ := parquetMsg.MetaGet(MetaS3UploadKey)
+	require.NotEmpty(t, key)
+	assert.Regexp(t, `\d{4}/\d{2}/\d{2}/`, key, "path has year/month/day (no source segment)")
+	// All originals share same parquet path#offset
+	idx0, _ := batches[0][1].MetaGet(MetaCloudeventIndex)
+	idx2, _ := batches[0][3].MetaGet(MetaCloudeventIndex)
+	path0 := idx0[:strings.Index(idx0, "#")]
+	path2 := idx2[:strings.Index(idx2, "#")]
+	assert.Equal(t, path0, path2, "all originals reference same parquet file")
 }
 
 // TestParquetToSplitValuesInsertStatements sends 50 mock CloudEvents through the parquet processor,
@@ -91,7 +66,7 @@ func TestParquetToSplitValuesInsertStatements(t *testing.T) {
 	const numMessages = 50
 	baseTime := time.Date(2025, 1, 15, 12, 0, 0, 0, time.UTC)
 
-	// Build 50 mock CloudEvent messages (sources device/1 and device/2 for grouping).
+	// Build 50 mock CloudEvent messages.
 	msgs := make(service.MessageBatch, numMessages)
 	for i := 0; i < numMessages; i++ {
 		source := "oracle/1"
