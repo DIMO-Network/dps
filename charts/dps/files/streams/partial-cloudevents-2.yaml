@@ -26,7 +26,7 @@ pipeline:
         prefix: cloudevent/partial/
     - label: "log_metadata_before_output_2"
       log:
-        level: INFO
+        level: DEBUG
         message: "Pre-output metadata (partial-cloudevents-2)"
         fields_mapping: |
           root = meta()
