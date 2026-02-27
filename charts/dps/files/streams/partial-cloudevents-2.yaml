@@ -49,8 +49,7 @@ output:
                           bucket: ${!metadata("dimo_s3_bucket")}
                           path: ${!metadata("dimo_s3_upload_key")}
                           content_type: application/octet-stream
-                          endpoint: ${OBJECT_STORAGE_ENDPOINT:https://s3.us-east-2.amazonaws.com}
-                          region: ${OBJECT_STORAGE_REGION:us-east-2}
+                          region: ${S3_AWS_REGION}
                           credentials:
                             id: ${OBJECT_STORAGE_ACCESS_KEY:${S3_AWS_ACCESS_KEY_ID}}
                             secret: ${OBJECT_STORAGE_SECRET_KEY:${S3_AWS_SECRET_ACCESS_KEY}}

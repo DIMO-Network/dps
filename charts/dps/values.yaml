@@ -48,7 +48,6 @@ env:
   # Iceberg / Object Storage (cloud-agnostic)
   ICEBERG_CATALOG_URI: http://lakekeeper:8181
   ICEBERG_WAREHOUSE: s3://dimo-storage-dev/warehouse/
-  OBJECT_STORAGE_ENDPOINT: https://s3.us-east-2.amazonaws.com
   LOG_LEVEL: DEBUG
 service:
   type: ClusterIP
