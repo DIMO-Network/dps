@@ -42,7 +42,7 @@ output:
         pattern: fan_out_sequential_fail_fast
         outputs:
           - fallback:
-                  - label: "write_valid_cloudevent_parquet_2"
+              - label: "write_valid_cloudevent_parquet_2"
                 switch:
                   cases:
                     - check: 'metadata("dimo_s3_upload_key").or("") != "" && metadata("dimo_s3_bucket").or("") != ""'
