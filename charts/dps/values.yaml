@@ -44,7 +44,9 @@ env:
   S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-dev
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-dev
   S3_AWS_REGION: us-east-2
-  PARQUET_BUCKET: s3://dimo-storage-dev/warehouse/
+  # Iceberg / Object Storage (cloud-agnostic)
+  ICEBERG_CATALOG_URI: http://lakekeeper:8181
+  ICEBERG_WAREHOUSE: s3://dimo-storage-dev/warehouse/
   LOG_LEVEL: DEBUG
 service:
   type: ClusterIP

@@ -7,7 +7,9 @@ env:
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-prod
   ENVIRONMENT: prod
   LOG_LEVEL: INFO
-  PARQUET_BUCKET: s3://dimo-storage-prod/warehouse/
+  # Iceberg / Object Storage (cloud-agnostic)
+  ICEBERG_CATALOG_URI: http://lakekeeper:8181
+  ICEBERG_WAREHOUSE: s3://dimo-storage-prod/warehouse/
 ingress:
   enabled: false
 resources:
