@@ -65,45 +65,6 @@ output:
                       meta dimo_component = "write_valid_cloudevent_parquet_2"
                   - resource: "handle_db_error"
 
-          - fallback:
-              - label: "insert_valid_cloudevent_clickhouse_2"
-                switch:
-                  cases:
-                    - check: 'metadata("dimo_s3_upload_key").or("") == ""'
-                      output:
-                        sql_insert:
-                          driver: clickhouse
-                          dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s&max_execution_time=300
-                          table: cloud_event_2
-                          columns: []
-                          args_mapping: root = this
-                          batching:
-                            count: 500000
-                            byte_size: 0
-                            period: "2s"
-                            check: ""
-                          processors:
-                            - label: "split_values_valid_2"
-                              dimo_split_values: {}
-                            - catch:
-                                - mutation: |
-                                    meta dimo_component = "split_values_valid_2"
-                                - resource: "handle_db_error"
-                                - mapping: root = deleted()
-
-              - label: 'insert_valid_cloudevent_clickhouse_failure_2'
-                switch:
-                  cases:
-                    - check: 'metadata("fallback_error").or("").contains("bad connection")'
-                      output:
-                        reject: metadata("fallback_error")
-                        processors:
-                          - resource: "handle_db_connection_error"
-                    - check: ''
-                      output:
-                        drop: {}
-                        processors:
-                          - mutation: |
-                              meta dimo_component = "insert_valid_cloudevent_clickhouse_2"
-                          - resource: "handle_db_error"
+          # ClickHouse insert disabled for S3/Iceberg test branch (no CH writes yet)
+          - drop: {}
     - drop: {}
