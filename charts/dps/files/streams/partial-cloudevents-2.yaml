@@ -18,13 +18,13 @@ input:
     batching:
       count: 10000
       period: "5s"
-      processors:
-        - dimo_cloudevent_to_parquet:
-            warehouse: ${PARQUET_BUCKET:s3://dimo-storage-dev/warehouse/}
-            prefix: cloudevent/partial/
 
 pipeline:
   processors:
+    - label: "partial_cloudevent_to_parquet_2"
+      dimo_cloudevent_to_parquet:
+        warehouse: ${PARQUET_BUCKET:s3://dimo-storage-dev/warehouse/}
+        prefix: cloudevent/partial/
     - label: "inputlogger_2"
       for_each:
         - log:
@@ -53,12 +53,14 @@ output:
                           credentials:
                             id: ${OBJECT_STORAGE_ACCESS_KEY:${S3_AWS_ACCESS_KEY_ID}}
                             secret: ${OBJECT_STORAGE_SECRET_KEY:${S3_AWS_SECRET_ACCESS_KEY}}
-              - label: 'write_partial_cloudevent_parquet_failure_2'
-                reject: '${!metadata("fallback_error").or("failed to write partial cloudevent parquet")}'
-                processors:
-                  - mutation: |
-                      meta dimo_component = "write_partial_cloudevent_parquet_2"
-                  - resource: "handle_db_error"
+                    - check: ''
+                      output:
+                        label: 'write_partial_cloudevent_parquet_failure_2'
+                        reject: '${!metadata("fallback_error").or("failed to write partial cloudevent parquet")}'
+                        processors:
+                          - mutation: |
+                              meta dimo_component = "write_partial_cloudevent_parquet_2"
+                          - resource: "handle_db_error"
 
           # ClickHouse insert disabled for S3/Iceberg test branch (no CH writes yet)
           - drop: {}
