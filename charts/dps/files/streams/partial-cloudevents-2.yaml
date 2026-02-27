@@ -23,7 +23,6 @@ pipeline:
   processors:
     - label: "partial_cloudevent_to_parquet_2"
       dimo_cloudevent_to_parquet:
-        warehouse: ${PARQUET_BUCKET:s3://dimo-storage-dev/warehouse/}
         prefix: cloudevent/partial/
     - label: "log_metadata_before_output_2"
       log:
@@ -42,16 +41,16 @@ output:
               - label: "write_partial_cloudevent_parquet_2"
                 switch:
                   cases:
-                    - check: 'metadata("dimo_s3_upload_key").or("") != "" && metadata("dimo_s3_bucket").or("") != ""'
+                    - check: 'metadata("dimo_s3_upload_key").or("") != ""'
                       output:
                         aws_s3:
-                          bucket: ${!metadata("dimo_s3_bucket")}
+                          bucket: ${PARQUET_BUCKET:dimo-storage-dev}
                           path: ${!metadata("dimo_s3_upload_key")}
                           content_type: application/octet-stream
                           region: ${S3_AWS_REGION}
                           credentials:
-                            id: ${OBJECT_STORAGE_ACCESS_KEY:${S3_AWS_ACCESS_KEY_ID}}
-                            secret: ${OBJECT_STORAGE_SECRET_KEY:${S3_AWS_SECRET_ACCESS_KEY}}
+                            id: ${S3_AWS_ACCESS_KEY_ID}
+                            secret: ${S3_AWS_SECRET_ACCESS_KEY}
                     - check: ''
                       output:
                         label: 'write_partial_cloudevent_parquet_failure_2'

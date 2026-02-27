@@ -21,11 +21,9 @@ import (
 
 const (
 	// MetaS3UploadKey is the object key for the Parquet file (path within bucket).
-	// aws_s3 output uses path: ${!metadata("dimo_s3_upload_key")}.
+	// aws_s3 output uses path: ${!metadata("dimo_s3_upload_key")}; bucket comes from env (e.g. PARQUET_BUCKET).
 	MetaS3UploadKey = "dimo_s3_upload_key"
-	// MetaS3Bucket is the bucket name for aws_s3 output (bucket: ${!metadata("dimo_s3_bucket")}).
-	MetaS3Bucket = "dimo_s3_bucket"
-	// MetaParquetPath is the full s3://bucket/key for downstream ClickHouse.
+	// MetaParquetPath is the object key (path) for downstream ClickHouse.
 	MetaParquetPath  = "dimo_parquet_path"
 	MetaParquetSize  = "dimo_parquet_size"
 	MetaParquetCount = "dimo_parquet_count"
@@ -35,8 +33,7 @@ const (
 
 var configSpec = service.NewConfigSpec().
 	Summary("Converts a batch of CloudEvents to Parquet messages (one per source group) with source/day paths for partition pruning, plus originals with metadata for aws_s3 and downstream.").
-	Field(service.NewStringField("warehouse").Description("Base path (e.g. s3://bucket/warehouse/).")).
-	Field(service.NewStringField("prefix").Description("Path prefix within warehouse (e.g. cloudevent/valid/)."))
+	Field(service.NewStringField("prefix").Description("Path prefix for object key (e.g. cloudevent/valid/)."))
 
 func init() {
 	err := service.RegisterBatchProcessor("dimo_cloudevent_to_parquet", configSpec, ctor)
@@ -46,26 +43,14 @@ func init() {
 }
 
 func ctor(conf *service.ParsedConfig, mgr *service.Resources) (service.BatchProcessor, error) {
-	warehouse, err := conf.FieldString("warehouse")
-	if err != nil {
-		return nil, fmt.Errorf("warehouse: %w", err)
-	}
 	prefix, err := conf.FieldString("prefix")
 	if err != nil {
 		return nil, fmt.Errorf("prefix: %w", err)
 	}
-	bucket, err := parseBucket(warehouse)
-	if err != nil {
-		return nil, fmt.Errorf("warehouse: %w", err)
-	}
-	return &processor{
-		bucket: bucket,
-		prefix: prefix,
-	}, nil
+	return &processor{prefix: prefix}, nil
 }
 
 type processor struct {
-	bucket string
 	prefix string
 }
 
@@ -101,19 +86,17 @@ func (p *processor) ProcessBatch(_ context.Context, msgs service.MessageBatch) (
 		}
 
 		objectKey := buildObjectKey(p.prefix, g.source, now)
-		fullPath := fmt.Sprintf("s3://%s/%s", p.bucket, objectKey)
 		fileSize := len(parquetBytes)
 		recordCount := len(g.indices)
 
 		parquetMsg := service.NewMessage(parquetBytes)
-		parquetMsg.MetaSetMut(MetaS3Bucket, p.bucket)
 		parquetMsg.MetaSetMut(MetaS3UploadKey, objectKey)
-		parquetMsg.MetaSetMut(MetaParquetPath, fullPath)
+		parquetMsg.MetaSetMut(MetaParquetPath, objectKey)
 		parquetMsg.MetaSetMut(MetaParquetSize, strconv.Itoa(fileSize))
 		parquetMsg.MetaSetMut(MetaParquetCount, strconv.Itoa(recordCount))
 		out = append(out, parquetMsg)
 
-		indexKeyPrefix := fullPath + "#"
+		indexKeyPrefix := objectKey + "#"
 		for i, idx := range g.indices {
 			msgs[idx].MetaSetMut(MetaCloudeventIndex, indexKeyPrefix+strconv.Itoa(i))
 		}
@@ -154,8 +137,8 @@ func groupBySource(msgs service.MessageBatch) ([]sourceGroup, error) {
 	return groups, nil
 }
 
-// sanitizePartitionValue makes a value safe for use in object key path segments
-// (e.g. source=...). Replaces / and \ with _; empty becomes "_".
+// sanitizePartitionValue makes a value safe for use in object key path segments.
+// Replaces / and \ with _; empty becomes "_".
 func sanitizePartitionValue(s string) string {
 	s = strings.ReplaceAll(s, "/", "_")
 	s = strings.ReplaceAll(s, "\\", "_")
@@ -167,19 +150,7 @@ func sanitizePartitionValue(s string) string {
 }
 
 func buildObjectKey(prefix, source string, t time.Time) string {
-	return fmt.Sprintf("%syear=%d/month=%02d/day=%02d/source=%s/batch-%s.parquet",
-		prefix, t.Year(), t.Month(), t.Day(), source, uuid.New().String())
+	return fmt.Sprintf("%s%d/%02d/%02d/%s/batch-%s.parquet",
+		prefix, t.Year(), int(t.Month()), t.Day(), source, uuid.New().String())
 }
 
-func parseBucket(warehouse string) (string, error) {
-	if len(warehouse) < 6 || warehouse[:5] != "s3://" {
-		return "", fmt.Errorf("warehouse must start with s3://: %s", warehouse)
-	}
-	rest := warehouse[5:]
-	for i, c := range rest {
-		if c == '/' {
-			return rest[:i], nil
-		}
-	}
-	return rest, nil
-}

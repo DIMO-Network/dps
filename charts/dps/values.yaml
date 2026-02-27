@@ -36,7 +36,6 @@ env:
   DEVICE_EVENTS_TOPIC: topic.device.events
   DEVICE_VALID_CE_TOPIC: topic.device.validcloudevents
   DEVICE_PARTIAL_CE_TOPIC: topic.device.partialcloudevents
-  ELASTIC_MULTIPLE_NODE: false
   ENVIRONMENT: dev
   CLICKHOUSE_PORT: 9440
   CLICKHOUSE_DIMO_DATABASE: dimo
@@ -44,7 +43,7 @@ env:
   S3_CLOUDEVENT_BUCKET: dimo-ingest-cloudevent-dev
   S3_EPHEMERAL_BUCKET: dimo-ingest-ephemeral-dev
   S3_AWS_REGION: us-east-2
-  PARQUET_BUCKET: s3://dimo-storage-dev
+  PARQUET_BUCKET: dimo-storage-dev
   LOG_LEVEL: DEBUG
 service:
   type: ClusterIP

@@ -16,35 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParseBucket(t *testing.T) {
-	tests := []struct {
-		name      string
-		warehouse string
-		expected  string
-		wantErr   bool
-	}{
-		{name: "standard", warehouse: "s3://my-bucket/warehouse/", expected: "my-bucket"},
-		{name: "no trailing slash", warehouse: "s3://my-bucket", expected: "my-bucket"},
-		{name: "with path", warehouse: "s3://dimo-storage-dev/warehouse/data/", expected: "dimo-storage-dev"},
-		{name: "invalid prefix", warehouse: "gs://bucket/path/", wantErr: true},
-		{name: "empty", warehouse: "", wantErr: true},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseBucket(tt.warehouse)
-			if tt.wantErr {
-				require.Error(t, err)
-				return
-			}
-			require.NoError(t, err)
-			assert.Equal(t, tt.expected, got)
-		})
-	}
-}
-
-func TestProcessBatch_MetadataAndBucket(t *testing.T) {
-	proc := &processor{bucket: "my-bucket", prefix: "cloudevent/valid/"}
+func TestProcessBatch_MetadataAndPath(t *testing.T) {
+	proc := &processor{prefix: "cloudevent/valid/"}
 	defer func() { _ = proc.Close(context.Background()) }()
 
 	msg := service.NewMessage([]byte(`{"id":"x","source":"s","producer":"p","specversion":"1.0","subject":"sub","time":"2025-01-01T00:00:00Z","type":"t"}`))
@@ -55,16 +28,16 @@ func TestProcessBatch_MetadataAndBucket(t *testing.T) {
 	parquetMsg := batches[0][0]
 	key, _ := parquetMsg.MetaGet(MetaS3UploadKey)
 	require.NotEmpty(t, key)
-	assert.Contains(t, key, "source=s/")
-	assert.Contains(t, key, "year=")
+	assert.Contains(t, key, "s/")
+	assert.Regexp(t, `\d{4}/\d{2}/\d{2}/`, key, "path has year/month/day segments")
 	assert.Contains(t, key, "batch-")
 	assert.Contains(t, key, ".parquet")
-	bucket, _ := parquetMsg.MetaGet(MetaS3Bucket)
-	assert.Equal(t, "my-bucket", bucket)
+	path, _ := parquetMsg.MetaGet(MetaParquetPath)
+	assert.Equal(t, key, path)
 }
 
 func TestProcessBatch_GroupBySource(t *testing.T) {
-	proc := &processor{bucket: "b", prefix: "p/"}
+	proc := &processor{prefix: "p/"}
 	defer func() { _ = proc.Close(context.Background()) }()
 
 	msg1 := service.NewMessage([]byte(`{"id":"a","source":"src1","producer":"p","specversion":"1.0","subject":"car1","time":"2025-01-01T00:00:00Z","type":"t"}`))
@@ -80,13 +53,13 @@ func TestProcessBatch_GroupBySource(t *testing.T) {
 		k, _ := batches[0][i].MetaGet(MetaS3UploadKey)
 		keys = append(keys, k)
 	}
-	assert.Contains(t, keys[0], "source=src1/")
-	assert.Contains(t, keys[1], "source=src2/")
+	assert.Contains(t, keys[0], "src1/")
+	assert.Contains(t, keys[1], "src2/")
 	// Originals: all have dimo_cloudevent_index (parquet_path#row_offset)
 	idx1, _ := batches[0][2].MetaGet(MetaCloudeventIndex)
 	idx3, _ := batches[0][4].MetaGet(MetaCloudeventIndex)
-	assert.Contains(t, idx1, "source=src1/")
-	assert.Contains(t, idx3, "source=src1/")
+	assert.Contains(t, idx1, "src1/")
+	assert.Contains(t, idx3, "src1/")
 	// Same file: index is path#offset, so prefix (path) should match for same group
 	assert.Equal(t, idx1[:strings.Index(idx1, "#")], idx3[:strings.Index(idx3, "#")])
 }
@@ -131,7 +104,7 @@ func TestParquetToSplitValuesInsertStatements(t *testing.T) {
 	}
 
 	// 1. Run parquet processor
-	proc := &processor{bucket: "my-bucket", prefix: "ce/valid/"}
+	proc := &processor{prefix: "ce/valid/"}
 	defer func() { _ = proc.Close(context.Background()) }()
 	batches, err := proc.ProcessBatch(context.Background(), msgs)
 	require.NoError(t, err)
