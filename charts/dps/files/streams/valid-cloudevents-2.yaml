@@ -54,14 +54,10 @@ output:
                           credentials:
                             id: ${S3_AWS_ACCESS_KEY_ID}
                             secret: ${S3_AWS_SECRET_ACCESS_KEY}
+                    # No dimo_s3_upload_key: original CE message from batch (only parquet msg has key). Drop silently.
                     - check: ''
                       output:
-                        label: 'write_valid_cloudevent_parquet_failure_2'
-                        reject: '${!metadata("fallback_error").or("failed to write cloudevent parquet")}'
-                        processors:
-                          - mutation: |
-                              meta dimo_component = "write_valid_cloudevent_parquet_2"
-                          - resource: "handle_db_error"
+                        drop: {}
 
           # ClickHouse insert disabled for S3/Iceberg test branch (no CH writes yet)
           - drop: {}
