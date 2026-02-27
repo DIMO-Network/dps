@@ -28,6 +28,12 @@ pipeline:
     - label: "file_index_migration_2"
       dimo_file_index_db_migration:
         dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s
+    - label: "log_metadata_before_output_2"
+      log:
+        level: INFO
+        message: "Pre-output metadata (valid-cloudevents-2)"
+        fields_mapping: |
+          root = meta()
 
 output:
   label: "insert_valid_cloudevent_2"

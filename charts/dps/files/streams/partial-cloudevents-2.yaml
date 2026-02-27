@@ -25,6 +25,12 @@ pipeline:
       dimo_cloudevent_to_parquet:
         warehouse: ${PARQUET_BUCKET:s3://dimo-storage-dev/warehouse/}
         prefix: cloudevent/partial/
+    - label: "log_metadata_before_output_2"
+      log:
+        level: INFO
+        message: "Pre-output metadata (partial-cloudevents-2)"
+        fields_mapping: |
+          root = meta()
 
 output:
   label: "insert_partial_cloudevent_2"
