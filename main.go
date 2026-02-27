@@ -21,6 +21,7 @@ import (
 	_ "github.com/redpanda-data/connect/v4/public/components/prometheus"
 
 	// Add our custom plugin packages here.
+	_ "github.com/DIMO-Network/dps/internal/processors/cloudeventtoparquet"
 	_ "github.com/DIMO-Network/dps/internal/processors/dbmigration"
 	_ "github.com/DIMO-Network/dps/internal/processors/eventstoslice"
 	_ "github.com/DIMO-Network/dps/internal/processors/signalstoslice"

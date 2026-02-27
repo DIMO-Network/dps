@@ -131,7 +131,7 @@ func TestProcessBatch(t *testing.T) {
 				require.NoError(t, err)
 				valsSlice, ok := vals.([]any)
 				require.True(t, ok)
-				require.Len(t, valsSlice, 10)
+				require.Len(t, valsSlice, 12)
 			}
 		})
 	}
