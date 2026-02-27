@@ -25,13 +25,6 @@ pipeline:
       dimo_cloudevent_to_parquet:
         warehouse: ${PARQUET_BUCKET:s3://dimo-storage-dev/warehouse/}
         prefix: cloudevent/partial/
-    - label: "inputlogger_2"
-      for_each:
-        - log:
-            level: DEBUG
-            message: 'MessageReceived'
-            fields_mapping: |
-              root.payload = this
 
 output:
   label: "insert_partial_cloudevent_2"
@@ -43,7 +36,7 @@ output:
               - label: "write_partial_cloudevent_parquet_2"
                 switch:
                   cases:
-                    - check: 'metadata("dimo_s3_upload_key").or("") != ""'
+                    - check: 'metadata("dimo_s3_upload_key").or("") != "" && metadata("dimo_s3_bucket").or("") != ""'
                       output:
                         aws_s3:
                           bucket: ${!metadata("dimo_s3_bucket")}

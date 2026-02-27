@@ -29,14 +29,6 @@ pipeline:
       dimo_file_index_db_migration:
         dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s
 
-    - label: "inputlogger_2"
-      for_each:
-        - log:
-            level: DEBUG
-            message: 'MessageReceived'
-            fields_mapping: |
-              root.payload = this
-
 output:
   label: "insert_valid_cloudevent_2"
   fallback:
@@ -44,10 +36,10 @@ output:
         pattern: fan_out_sequential_fail_fast
         outputs:
           - fallback:
-              - label: "write_valid_cloudevent_parquet_2"
+                  - label: "write_valid_cloudevent_parquet_2"
                 switch:
                   cases:
-                    - check: 'metadata("dimo_s3_upload_key").or("") != ""'
+                    - check: 'metadata("dimo_s3_upload_key").or("") != "" && metadata("dimo_s3_bucket").or("") != ""'
                       output:
                         aws_s3:
                           bucket: ${!metadata("dimo_s3_bucket")}
