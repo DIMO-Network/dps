@@ -168,7 +168,7 @@ func TestParquetToSplitValuesInsertStatements(t *testing.T) {
 		require.NoError(t, err)
 		row, ok := vals.([]any)
 		require.True(t, ok)
-		require.Len(t, row, 12)
+		require.Len(t, row, 10)
 		stmt := formatInsertStmt("cloud_event_2", row)
 		t.Logf("%d: %s", i+1, stmt)
 	}
@@ -198,9 +198,9 @@ func runSplitValues(t *testing.T, msgs service.MessageBatch) []*service.Message 
 	return out
 }
 
-// formatInsertStmt returns a single-row INSERT statement for the clickhouse row (subject, event_time, event_type, id, source, producer, data_content_type, data_version, dataschema, extras, tags, index_key).
+// formatInsertStmt returns a single-row INSERT statement for the clickhouse row (subject, event_time, event_type, id, source, producer, data_content_type, data_version, extras, index_key). cloudevent v0.1.6 returns 10 columns.
 func formatInsertStmt(table string, row []any) string {
-	cols := []string{clickhouse.SubjectColumn, clickhouse.TimestampColumn, clickhouse.TypeColumn, clickhouse.IDColumn, clickhouse.SourceColumn, clickhouse.ProducerColumn, clickhouse.DataContentTypeColumn, clickhouse.DataVersionColumn, clickhouse.DataSchemaColumn, clickhouse.ExtrasColumn, clickhouse.TagsColumn, clickhouse.IndexKeyColumn}
+	cols := []string{"subject", "event_time", "event_type", "id", "source", "producer", "data_content_type", "data_version", "extras", "index_key"}
 	var parts []string
 	for _, v := range row {
 		parts = append(parts, formatSQLValue(v))
