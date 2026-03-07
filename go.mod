@@ -5,7 +5,7 @@ go 1.25.0
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.43.0
 	github.com/DIMO-Network/clickhouse-infra v0.0.7
-	github.com/DIMO-Network/cloudevent v0.2.1
+	github.com/DIMO-Network/cloudevent v0.2.2
 	github.com/DIMO-Network/model-garage v0.9.0
 	github.com/google/uuid v1.6.0
 	github.com/redpanda-data/benthos/v4 v4.55.0

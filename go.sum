@@ -671,8 +671,8 @@ github.com/DATA-DOG/go-sqlmock v1.5.2 h1:OcvFkGmslmlZibjAjaHm3L//6LiuBgolP7Oputl
 github.com/DATA-DOG/go-sqlmock v1.5.2/go.mod h1:88MAG/4G7SMwSE3CeA0ZKzrT5CiOU3OJ+JlNzwDqpNU=
 github.com/DIMO-Network/clickhouse-infra v0.0.7 h1:TAsjkFFKu3D5Xg6dwBcRBryjCVSlXsNjVbTwJ4UDlTg=
 github.com/DIMO-Network/clickhouse-infra v0.0.7/go.mod h1:XS80lhSJNWBWGgZ+m4j7++zFj1wAXfmtV2gJfhGlabQ=
-github.com/DIMO-Network/cloudevent v0.2.1 h1:9BMnkVofjoOvFHkJfqe/vOUGnZwrfJtExNtfdMzqlh8=
-github.com/DIMO-Network/cloudevent v0.2.1/go.mod h1:zFG6pf7ejwC0y3//mHpISDHR/blsSz8Lew2c4ebc8Lw=
+github.com/DIMO-Network/cloudevent v0.2.2 h1:nSVLa6AIv2I5w0X180Dbds19ttZzqtrqEJfTG8ff2AI=
+github.com/DIMO-Network/cloudevent v0.2.2/go.mod h1:zFG6pf7ejwC0y3//mHpISDHR/blsSz8Lew2c4ebc8Lw=
 github.com/DIMO-Network/model-garage v0.9.0 h1:JGOZlsca3vHwGxJ2nxRMJG4CnMFcOYOIb5cghl8fUa8=
 github.com/DIMO-Network/model-garage v0.9.0/go.mod h1:pWce1INj+K6ol6tauww6F5z9WIpwNEnsAs9Uw8bjLE8=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
