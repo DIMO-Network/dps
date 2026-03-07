@@ -13,8 +13,11 @@ input:
     fetch_min_bytes: 1B
     fetch_max_partition_bytes: 10MiB
     commit_period: 5s
-    checkpoint_limit: 1000000 # double the batch size for insertion
+    checkpoint_limit: 1000000
     start_offset: "latest"
+    batching:
+      count: 10000
+      period: "5s"
 
 
 pipeline:
@@ -26,6 +29,9 @@ pipeline:
             message: 'MessageReceived'
             fields_mapping: |
               root.payload = this
+    - label: "valid_cloudevent_to_parquet_2"
+      dimo_cloudevent_to_parquet:
+        prefix: cloudevent/valid/
 
 output:
   label: "insert_valid_cloudevent"
@@ -34,58 +40,65 @@ output:
         pattern: fan_out_sequential_fail_fast
         outputs:
           - fallback:
-              - label: "insert_valid_cloudevent_s3"
-                aws_s3:
-                  bucket: ${S3_CLOUDEVENT_BUCKET}
-                  path: ${!meta("dimo_cloudevent_index")}
-                  content_type: application/json
-                  region: ${S3_AWS_REGION}
-                  max_in_flight: 250
-                  timeout: 30s
-                  metadata:
-                    exclude_prefixes: ["dimo_cloudevent_index"]
-                  credentials:
-                    id: ${S3_AWS_ACCESS_KEY_ID}
-                    secret: ${S3_AWS_SECRET_ACCESS_KEY}
-                  batching:
-                    count: 10000
-                    period: "5s"
-              # reject the message, log, record metrics
-              # reject instead of drop to avoid attempting CH index insert with no backing obj
+              - label: "insert_valid_cloudevent_parquet_s3"
+                switch:
+                  cases:
+                    - check: 'metadata("dimo_s3_upload_key").or("") != ""'
+                      output:
+                        aws_s3:
+                          bucket: ${PARQUET_BUCKET}
+                          path: ${!metadata("dimo_s3_upload_key")}
+                          content_type: application/octet-stream
+                          region: ${S3_AWS_REGION}
+                          credentials:
+                            id: ${S3_AWS_ACCESS_KEY_ID}
+                            secret: ${S3_AWS_SECRET_ACCESS_KEY}
+                    # Original CE messages (no upload key) — drop silently
+                    - check: ''
+                      output:
+                        drop: {}
+              # reject the batch so CH index insert is not attempted without backing parquet file
               - label: 'insert_valid_cloudevent_s3_failure'
-                reject: '${!metadata("fallback_error").or("failed to store converted cloudevent")}'
-                # processor is happening first, so we can use it to set the meta
+                reject: '${!metadata("fallback_error").or("failed to store parquet file")}'
                 processors:
                   -  mutation: |
-                       meta dimo_component = "insert_valid_cloudevent_s3"
+                       meta dimo_component = "insert_valid_cloudevent_parquet_s3"
                   - resource: "handle_db_error"
 
           - fallback:
               - label: "insert_valid_cloudevent_clickhouse"
-                sql_insert:
-                  driver: clickhouse
-                  dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s&max_execution_time=300
-                  table: cloud_event
-                  columns: []
-                  args_mapping: root = this
-                  batching:
-                    count: 500000
-                    byte_size: 0
-                    period: "2s"
-                    check: ""
-                processors:
-                  - label: "split_values_valid"
-                    dimo_split_values: {}
-                  - catch:
-                      -  mutation: |
-                           meta dimo_component = "split_values_valid"
-                      - resource: "handle_db_error"
-                      - mapping: root = deleted()
+                switch:
+                  cases:
+                    # Original CE messages — insert into CH index
+                    - check: 'metadata("dimo_s3_upload_key").or("") == ""'
+                      output:
+                        sql_insert:
+                          driver: clickhouse
+                          dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s&max_execution_time=300
+                          table: cloud_event
+                          columns: []
+                          args_mapping: root = this
+                          batching:
+                            count: 500000
+                            byte_size: 0
+                            period: "2s"
+                            check: ""
+                      processors:
+                        - label: "split_values_valid"
+                          dimo_split_values: {}
+                        - catch:
+                            -  mutation: |
+                                 meta dimo_component = "split_values_valid"
+                            - resource: "handle_db_error"
+                            - mapping: root = deleted()
+                    # Parquet message — not for CH, drop
+                    - check: ''
+                      output:
+                        drop: {}
 
               - label: 'insert_valid_cloudevent_clickhouse_failure'
                 switch:
                   cases:
-                  # If the error contains "bad connection", reject the message so it will be retried
                     - check: 'metadata("fallback_error").or("").contains("bad connection")'
                       output:
                         reject: metadata("fallback_error")
@@ -96,6 +109,6 @@ output:
                         drop: {}
                         processors:
                           -  mutation: |
-                              meta dimo_component = "insert_signal_clickhouse"
+                              meta dimo_component = "insert_valid_cloudevent_clickhouse"
                           - resource: "handle_db_error"
     - drop: {}

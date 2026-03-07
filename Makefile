@@ -54,7 +54,7 @@ dep:
 
 lint-benthos: build  ## Run Benthos linter
 	@CLICKHOUSE_HOST="" CLICKHOUSE_PORT="" CLICKHOUSE_DIMO_DATABASE="" CLICKHOUSE_INDEX_DATABASE=""  CLICKHOUSE_USER="" CLICKHOUSE_PASSWORD="" \
-		S3_AWS_ACCESS_KEY_ID="" S3_AWS_SECRET_ACCESS_KEY="" S3_CLOUDEVENT_BUCKET="" S3_EPHEMERAL_BUCKET="" S3_AWS_REGION="" \
+		S3_AWS_ACCESS_KEY_ID="" S3_AWS_SECRET_ACCESS_KEY="" S3_AWS_REGION="" PARQUET_BUCKET="" \
 	dps lint -r ./charts/dps/files/resources.yaml ./charts/dps/files/config.yaml ./charts/dps/files/streams/*
 
 lint: lint-benthos ## Run linter for benthos config and go code
