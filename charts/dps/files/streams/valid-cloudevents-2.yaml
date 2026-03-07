@@ -24,9 +24,6 @@ pipeline:
     - label: "valid_cloudevent_to_parquet_2"
       dimo_cloudevent_to_parquet:
         prefix: cloudevent/valid/
-    - label: "file_index_migration_2"
-      dimo_file_index_db_migration:
-        dsn: clickhouse://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}/${CLICKHOUSE_INDEX_DATABASE}?username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}&secure=true&dial_timeout=5s
     - label: "log_metadata_before_output_2"
       log:
         level: DEBUG

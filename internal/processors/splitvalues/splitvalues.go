@@ -7,14 +7,13 @@ import (
 	"fmt"
 
 	"github.com/DIMO-Network/cloudevent"
-	"github.com/DIMO-Network/cloudevent/pkg/clickhouse"
+	"github.com/DIMO-Network/cloudevent/clickhouse"
 	"github.com/redpanda-data/benthos/v4/public/service"
 )
 
 const (
 	cloudEventIndexValueKey = "dimo_cloudevent_index_value"
 	cloudeventIndexKey      = "dimo_cloudevent_index"
-	oldIndexSize            = 9
 )
 
 var configSpec = service.NewConfigSpec().

@@ -3,6 +3,7 @@ package splitvalues
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -134,6 +135,43 @@ func TestProcessBatch(t *testing.T) {
 				require.Len(t, valsSlice, 10)
 			}
 		})
+	}
+}
+
+func BenchmarkProcessBatch(b *testing.B) {
+	fixedTime := time.Date(2024, 1, 1, 12, 0, 0, 0, time.UTC)
+
+	// Build 1000 messages with cloud event headers as index values
+	msgs := make(service.MessageBatch, 1000)
+	for i := range msgs {
+		hdr := cloudevent.CloudEventHeader{
+			ID:          fmt.Sprintf("test-id-%d", i),
+			Source:      fmt.Sprintf("device/%d", i%100),
+			Producer:    "test-producer",
+			SpecVersion: "1.0",
+			Subject:     fmt.Sprintf("vehicle/%d", i%50),
+			Time:        fixedTime.Add(time.Duration(i) * time.Second),
+			Type:        "device.event.v1",
+		}
+		hdrsJSON, err := json.Marshal([]cloudevent.CloudEventHeader{hdr})
+		if err != nil {
+			b.Fatal(err)
+		}
+		msg := service.NewMessage(nil)
+		msg.MetaSetMut(cloudEventIndexValueKey, string(hdrsJSON))
+		msg.MetaSetMut(cloudeventIndexKey, fmt.Sprintf("path/to/file.parquet#%d", i))
+		msgs[i] = msg
+	}
+
+	p := processor{}
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for b.Loop() {
+		_, err := p.ProcessBatch(context.Background(), msgs)
+		if err != nil {
+			b.Fatal(err)
+		}
 	}
 }
 
